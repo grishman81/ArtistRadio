@@ -22,9 +22,16 @@ from src.radio.storage import RadioStorage
 
 from src.audio.player import AudioPlayer
 
+from src.console.app import ConsoleApp
 
-STATIONS_CONFIG = Path("config/stations.json")
-RADIO_STATE_FILE = Path("radio_state.json")
+
+STATIONS_CONFIG = Path(
+    "config/stations.json"
+)
+
+RADIO_STATE_FILE = Path(
+    "radio_state.json"
+)
 
 
 def main():
@@ -84,15 +91,11 @@ def main():
 
         session.start()
 
-        for _ in range(3):
-            track = session.play_next()
+        console = ConsoleApp(
+            session
+        )
 
-            if track:
-                print(
-                    f"Now playing: {track.title}"
-                )
-
-        session.stop()
+        console.run()
 
     finally:
         manager.close()
