@@ -94,13 +94,16 @@ class RadioSession:
 
             self.state.position = 0.0
 
+
             self.player.play(
                 track.path
             )
 
+
             self.history.add(
                 track
             )
+
 
             self.save()
 
@@ -176,14 +179,32 @@ class RadioSession:
                     self.state.position,
                 )
 
+
                 self.history.add(
                     track
                 )
+
 
                 return track
 
 
         return self.play_next()
+
+
+
+    def check_playback(self):
+
+        if not self.state.running:
+
+            return None
+
+
+        if self.player.is_finished():
+
+            return self.play_next()
+
+
+        return None
 
 
 
