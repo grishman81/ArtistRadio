@@ -20,6 +20,7 @@ from src.station.generator import StationGenerator
 from src.radio.engine import RadioEngine
 from src.radio.session import RadioSession
 from src.radio.storage import RadioStorage
+from src.radio.history import PlaybackHistory
 
 from src.audio.player import AudioPlayer
 
@@ -30,10 +31,15 @@ RADIO_STATE_FILE = Path(
     "radio_state.json"
 )
 
+RADIO_HISTORY_FILE = Path(
+    "radio_history.json"
+)
+
 
 def select_station(
     stations: StationManager,
 ):
+
     available = stations.all()
 
     print()
@@ -70,6 +76,7 @@ def restore_station(
     stations: StationManager,
     storage: RadioStorage,
 ):
+
     state = storage.load()
 
     if not state.station:
@@ -111,21 +118,22 @@ def main():
     )
 
     try:
+
         manager.build()
 
         library = Library(
             config.DATABASE_FOLDER
         )
 
-        history = PlaylistHistory()
+        playlist_history = PlaylistHistory()
 
         randomizer = PlaylistRandomizer(
-            history
+            playlist_history
         )
 
         playlist = PlaylistEngine(
             randomizer,
-            history,
+            playlist_history,
         )
 
         stations = StationManager(
@@ -151,6 +159,10 @@ def main():
             RADIO_STATE_FILE
         )
 
+        playback_history = PlaybackHistory(
+            RADIO_HISTORY_FILE
+        )
+
         restored = False
 
         station = restore_station(
@@ -160,6 +172,7 @@ def main():
 
         if station is not None:
             restored = True
+
         else:
             station = select_station(
                 stations
@@ -175,11 +188,13 @@ def main():
             radio,
             storage,
             player,
+            playback_history,
         )
 
         session.start()
 
         if restored:
+
             track = session.resume_playback()
 
             if track:
@@ -195,6 +210,7 @@ def main():
         console.run()
 
     finally:
+
         manager.close()
 
 
