@@ -9,6 +9,8 @@ from src.radio.engine import RadioEngine
 from src.radio.state import RadioState
 from src.radio.storage import RadioStorage
 
+from src.audio.player import AudioPlayer
+
 from src.library.models import Track
 
 
@@ -21,17 +23,19 @@ class RadioSession:
         self,
         radio: RadioEngine,
         storage: RadioStorage,
+        player: AudioPlayer,
     ):
         self.radio = radio
         self.storage = storage
+        self.player = player
 
         self.state = RadioState(
             station=radio.station.name
         )
 
-        self._save()
+        self.save()
 
-    def _save(self) -> None:
+    def save(self) -> None:
         self.storage.save(
             self.state
         )
@@ -41,14 +45,16 @@ class RadioSession:
 
         self.radio.start()
 
-        self._save()
+        self.save()
 
     def stop(self) -> None:
         self.state.running = False
 
+        self.player.stop()
+
         self.radio.stop()
 
-        self._save()
+        self.save()
 
     def play_next(self) -> Optional[Track]:
         if not self.state.running:
@@ -58,6 +64,12 @@ class RadioSession:
 
         if track:
             self.state.track = str(track.path)
-            self._save()
+
+            if track.path:
+                self.player.play(
+                    track.path
+                )
+
+            self.save()
 
         return track
