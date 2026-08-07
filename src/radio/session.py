@@ -3,6 +3,7 @@ ArtistRadio Engine
 Radio Session
 """
 
+from pathlib import Path
 from typing import Optional
 
 from src.radio.engine import RadioEngine
@@ -18,6 +19,7 @@ from src.library.models import Track
 
 
 class RadioSession:
+
     """
     Управляет эфирной сессией.
     """
@@ -86,20 +88,48 @@ class RadioSession:
 
         return track
 
+    def play_history_item(
+        self,
+        index: int,
+    ) -> Optional[Track]:
+
+        item = self.history.get(
+            index
+        )
+
+        if item is None:
+            return None
+
+        track = Track(
+            artist=item["artist"],
+            album=item["album"],
+            title=item["title"],
+            year=item["year"],
+            path=Path(
+                item["path"]
+            ),
+        )
+
+        self.player.play(
+            track.path
+        )
+
+        self.state.track = str(
+            track.path
+        )
+
+        self.save()
+
+        return track
+
     def resume_playback(self):
-        """
-        Продолжает эфир после восстановления станции.
-        """
 
         return self.play_next()
 
     def switch_station(
         self,
-        station: Station
+        station: Station,
     ):
-        """
-        Переключает эфир.
-        """
 
         self.player.stop()
 

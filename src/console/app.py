@@ -8,9 +8,6 @@ from src.station.manager import StationManager
 
 
 class ConsoleApp:
-    """
-    Консольный пульт управления радио.
-    """
 
     def __init__(
         self,
@@ -21,7 +18,9 @@ class ConsoleApp:
         self.stations = stations
 
     def run(self) -> None:
+
         while True:
+
             print()
             print("====================")
             print(" ArtistRadio Console")
@@ -38,6 +37,7 @@ class ConsoleApp:
             command = input("> ").strip()
 
             if command == "1":
+
                 track = self.session.play_next()
 
                 if track:
@@ -46,18 +46,22 @@ class ConsoleApp:
                     )
 
             elif command == "2":
+
                 self.session.player.pause()
                 print("Paused")
 
             elif command == "3":
+
                 self.session.player.resume()
                 print("Resumed")
 
             elif command == "4":
+
                 self.session.stop()
                 print("Stopped")
 
             elif command == "5":
+
                 track = (
                     self.session.player.current_track()
                 )
@@ -72,22 +76,27 @@ class ConsoleApp:
                     )
 
             elif command == "6":
+
                 self.change_station()
 
             elif command == "7":
+
                 self.show_history()
 
             elif command == "8":
+
                 self.session.stop()
                 print("Bye")
                 break
 
             else:
+
                 print(
                     "Unknown command"
                 )
 
-    def show_history(self) -> None:
+    def show_history(self):
+
         print()
         print("Playback history:")
         print()
@@ -95,15 +104,18 @@ class ConsoleApp:
         history = self.session.history.items()
 
         if not history:
+
             print(
                 "History is empty"
             )
+
             return
 
         for index, item in enumerate(
             history,
             start=1,
         ):
+
             print(
                 f"{index}. {item['artist']}"
             )
@@ -115,7 +127,35 @@ class ConsoleApp:
             )
             print()
 
-    def change_station(self) -> None:
+        choice = input(
+            "Select track (0 cancel): "
+        ).strip()
+
+        try:
+
+            number = int(choice)
+
+            if number == 0:
+                return
+
+            track = self.session.play_history_item(
+                number - 1
+            )
+
+            if track:
+
+                print(
+                    f"Now playing: {track.title}"
+                )
+
+        except ValueError:
+
+            print(
+                "Invalid selection"
+            )
+
+    def change_station(self):
+
         stations = self.stations.all()
 
         if not stations:
@@ -140,9 +180,10 @@ class ConsoleApp:
         ).strip()
 
         try:
-            index = int(choice) - 1
 
-            station = stations[index]
+            station = stations[
+                int(choice) - 1
+            ]
 
             self.session.switch_station(
                 station
@@ -158,6 +199,7 @@ class ConsoleApp:
             ValueError,
             IndexError,
         ):
+
             print(
                 "Invalid station"
             )
