@@ -15,7 +15,9 @@ from src.playlist.randomizer import PlaylistRandomizer
 from src.playlist.engine import PlaylistEngine
 
 from src.station.manager import StationManager
+
 from src.radio.engine import RadioEngine
+from src.radio.session import RadioSession
 
 
 STATIONS_CONFIG = Path("config/stations.json")
@@ -30,7 +32,9 @@ def main():
     try:
         manager.build()
 
-        library = Library(config.DATABASE_FOLDER)
+        library = Library(
+            config.DATABASE_FOLDER
+        )
 
         history = PlaylistHistory()
 
@@ -62,14 +66,21 @@ def main():
             station
         )
 
-        radio.start()
+        session = RadioSession(
+            radio
+        )
 
-        track = radio.next()
+        session.start()
 
-        if track:
-            print(
-                f"Now playing: {track.title}"
-            )
+        for _ in range(3):
+            track = session.play_next()
+
+            if track:
+                print(
+                    f"Now playing: {track.title}"
+                )
+
+        session.stop()
 
     finally:
         manager.close()
