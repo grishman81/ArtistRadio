@@ -3,6 +3,7 @@ ArtistRadio Engine
 Main
 """
 
+import sys
 from pathlib import Path
 
 from src import config
@@ -54,6 +55,7 @@ def select_station(
         )
 
     while True:
+
         choice = input(
             "Select station: "
         ).strip()
@@ -110,7 +112,44 @@ def restore_station(
     return None
 
 
+def rebuild_library():
+
+    database = (
+        config.DATABASE_FOLDER
+        / "library.db"
+    )
+
+    if database.exists():
+        database.unlink()
+
+    manager = LibraryManager(
+        music_root=config.MUSIC_ROOT,
+        database_folder=config.DATABASE_FOLDER,
+    )
+
+    try:
+        manager.build()
+
+    finally:
+        manager.close()
+
+
 def main():
+
+    if "--scan" in sys.argv:
+
+        print(
+            "Rebuilding library..."
+        )
+
+        rebuild_library()
+
+        print(
+            "Library rebuild complete."
+        )
+
+        return
+
 
     manager = LibraryManager(
         music_root=config.MUSIC_ROOT,
@@ -147,6 +186,7 @@ def main():
         )
 
         for station in generator.generate():
+
             stations.add(
                 station
             )
