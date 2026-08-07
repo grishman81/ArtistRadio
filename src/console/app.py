@@ -64,7 +64,7 @@ class ConsoleApp:
 
                 if track:
                     print(
-                        f"Current: {track.name}"
+                        f"Current: {track.title}"
                     )
                 else:
                     print(
@@ -92,6 +92,7 @@ class ConsoleApp:
 
         print()
         print("Playback history:")
+        print()
 
         if not station.history:
             print(
@@ -104,8 +105,15 @@ class ConsoleApp:
             start=1,
         ):
             print(
-                f"{index}. {track.title}"
+                f"{index}. {track.artist}"
             )
+            print(
+                f"   {track.title}"
+            )
+            print(
+                f"   {track.album}"
+            )
+            print()
 
     def change_station(self) -> None:
         stations = self.stations.all()
