@@ -28,6 +28,9 @@ from src.audio.player import AudioPlayer
 from src.console.app import ConsoleApp
 
 
+VERSION = "0.5.0"
+
+
 RADIO_STATE_FILE = Path(
     "radio_state.json"
 )
@@ -35,6 +38,46 @@ RADIO_STATE_FILE = Path(
 RADIO_HISTORY_FILE = Path(
     "radio_history.json"
 )
+
+
+def show_help():
+
+    print(
+        """
+ArtistRadio
+
+Usage:
+
+  python -m src.main
+      Start radio
+
+  python -m src.main --scan
+      Rebuild music library
+
+  python -m src.main --help
+      Show help
+
+  python -m src.main --version
+      Show version
+"""
+    )
+
+
+def handle_cli():
+
+    if "--help" in sys.argv:
+
+        show_help()
+        return True
+
+    if "--version" in sys.argv:
+
+        print(
+            f"ArtistRadio v{VERSION}"
+        )
+        return True
+
+    return False
 
 
 def select_station(
@@ -61,6 +104,7 @@ def select_station(
         ).strip()
 
         try:
+
             return available[
                 int(choice) - 1
             ]
@@ -69,6 +113,7 @@ def select_station(
             ValueError,
             IndexError,
         ):
+
             print(
                 "Invalid selection"
             )
@@ -120,6 +165,7 @@ def rebuild_library():
     )
 
     if database.exists():
+
         database.unlink()
 
     manager = LibraryManager(
@@ -128,13 +174,20 @@ def rebuild_library():
     )
 
     try:
+
         manager.build()
 
     finally:
+
         manager.close()
 
 
 def main():
+
+    if handle_cli():
+
+        return
+
 
     if "--scan" in sys.argv:
 
@@ -195,6 +248,7 @@ def main():
             f"Loaded stations: {stations.count}"
         )
 
+
         storage = RadioStorage(
             RADIO_STATE_FILE
         )
@@ -203,26 +257,33 @@ def main():
             RADIO_HISTORY_FILE
         )
 
+
         restored = False
+
 
         station = restore_station(
             stations,
             storage,
         )
 
+
         if station is not None:
+
             restored = True
 
         else:
+
             station = select_station(
                 stations
             )
+
 
         radio = RadioEngine(
             station
         )
 
         player = AudioPlayer()
+
 
         session = RadioSession(
             radio,
@@ -231,16 +292,20 @@ def main():
             playback_history,
         )
 
+
         session.start()
+
 
         if restored:
 
             track = session.resume_playback()
 
             if track:
+
                 print(
                     f"Now playing: {track.title}"
                 )
+
 
         console = ConsoleApp(
             session,
@@ -249,10 +314,12 @@ def main():
 
         console.run()
 
+
     finally:
 
         manager.close()
 
 
 if __name__ == "__main__":
+
     main()
