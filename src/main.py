@@ -31,8 +31,9 @@ RADIO_STATE_FILE = Path(
 )
 
 
-def select_station(stations):
-
+def select_station(
+    stations: StationManager,
+):
     available = stations.all()
 
     print()
@@ -49,7 +50,7 @@ def select_station(stations):
     while True:
         choice = input(
             "Select station: "
-        )
+        ).strip()
 
         try:
             return available[
@@ -66,8 +67,8 @@ def select_station(stations):
 
 
 def restore_station(
-    stations,
-    storage,
+    stations: StationManager,
+    storage: RadioStorage,
 ):
     state = storage.load()
 
@@ -78,7 +79,7 @@ def restore_station(
         state.station
     )
 
-    if not station:
+    if station is None:
         return None
 
     print()
@@ -94,7 +95,7 @@ def restore_station(
 
     choice = input(
         "> "
-    )
+    ).strip()
 
     if choice == "1":
         return station
@@ -110,7 +111,6 @@ def main():
     )
 
     try:
-
         manager.build()
 
         library = Library(
@@ -151,12 +151,16 @@ def main():
             RADIO_STATE_FILE
         )
 
+        restored = False
+
         station = restore_station(
             stations,
             storage,
         )
 
-        if station is None:
+        if station is not None:
+            restored = True
+        else:
             station = select_station(
                 stations
             )
@@ -174,6 +178,14 @@ def main():
         )
 
         session.start()
+
+        if restored:
+            track = session.resume_playback()
+
+            if track:
+                print(
+                    f"Now playing: {track.title}"
+                )
 
         console = ConsoleApp(
             session,
