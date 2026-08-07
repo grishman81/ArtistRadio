@@ -88,30 +88,30 @@ class ConsoleApp:
                 )
 
     def show_history(self) -> None:
-        station = self.session.radio.station
-
         print()
         print("Playback history:")
         print()
 
-        if not station.history:
+        history = self.session.history.items()
+
+        if not history:
             print(
                 "History is empty"
             )
             return
 
-        for index, track in enumerate(
-            reversed(station.history),
+        for index, item in enumerate(
+            history,
             start=1,
         ):
             print(
-                f"{index}. {track.artist}"
+                f"{index}. {item['artist']}"
             )
             print(
-                f"   {track.title}"
+                f"   {item['title']}"
             )
             print(
-                f"   {track.album}"
+                f"   {item['album']}"
             )
             print()
 
