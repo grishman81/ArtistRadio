@@ -99,12 +99,60 @@ class CrossfadeEngine:
 
 
 
+    def update(
+        self,
+        elapsed: float | None = None,
+    ):
+
+        if elapsed is not None:
+
+            self.elapsed_time = elapsed
+
+
+        if self.duration <= 0:
+
+            progress = 1.0
+
+        else:
+
+            progress = (
+                self.elapsed_time
+                /
+                self.duration
+            )
+
+
+        progress = max(
+            0.0,
+            min(
+                1.0,
+                progress,
+            )
+        )
+
+
+        return {
+            "old": round(
+                1.0 - progress,
+                2,
+            ),
+
+            "new": round(
+                progress,
+                2,
+            ),
+        }
+
+
+
     def is_complete(self):
 
         return (
             self.progress()
             >=
             1.0
+            or
+            self.elapsed_time >= self.duration
         )
 
 
