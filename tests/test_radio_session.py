@@ -6,6 +6,7 @@ Radio Session Tests
 from pathlib import Path
 
 from src.library.library import Library
+
 from src.playlist.history import PlaylistHistory
 from src.playlist.randomizer import PlaylistRandomizer
 from src.playlist.engine import PlaylistEngine
@@ -14,14 +15,19 @@ from src.station.station import Station
 
 from src.radio.engine import RadioEngine
 from src.radio.session import RadioSession
+from src.radio.storage import RadioStorage
 
 
 def create_session():
-    library = Library(Path("database"))
+    library = Library(
+        Path("database")
+    )
 
     history = PlaylistHistory()
 
-    randomizer = PlaylistRandomizer(history)
+    randomizer = PlaylistRandomizer(
+        history
+    )
 
     playlist = PlaylistEngine(
         randomizer,
@@ -35,9 +41,18 @@ def create_session():
         playlist=playlist,
     )
 
-    radio = RadioEngine(station)
+    radio = RadioEngine(
+        station
+    )
 
-    return RadioSession(radio)
+    storage = RadioStorage(
+        Path("test_radio_state.json")
+    )
+
+    return RadioSession(
+        radio,
+        storage,
+    )
 
 
 def test_radio_session_start_stop():
@@ -60,4 +75,10 @@ def test_radio_session_play_next():
     track = session.play_next()
 
     assert track is not None
-    assert session.state.track == str(track.path)
+
+    assert (
+        session.state.track
+        == str(track.path)
+    )
+
+    session.stop()
