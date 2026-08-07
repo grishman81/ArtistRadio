@@ -3,19 +3,23 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Database
-database/*.db
-
-# Logs
-logs/
-
-# Cache
-cache/
-
 # Virtual environments
 venv/
 .venv/
 env/
+ENV/
+
+# Database
+database/*.db
+
+# Cache & Logs
+cache/
+logs/
+
+# Test / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
 
 # IDE
 .vscode/
