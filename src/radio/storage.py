@@ -14,15 +14,28 @@ class RadioStorage:
     Сохраняет состояние радио.
     """
 
-    def __init__(self, path: Path):
+
+    def __init__(
+        self,
+        path: Path,
+    ):
+
         self.path = path
 
-    def save(self, state: RadioState) -> None:
+
+
+    def save(
+        self,
+        state: RadioState,
+    ) -> None:
+
         data = {
             "station": state.station,
             "track": state.track,
             "running": state.running,
+            "mode": state.mode,
         }
+
 
         self.path.write_text(
             json.dumps(
@@ -33,9 +46,15 @@ class RadioStorage:
             encoding="utf-8",
         )
 
+
+
     def load(self) -> RadioState:
+
         if not self.path.exists():
+
             return RadioState()
+
+
 
         data = json.loads(
             self.path.read_text(
@@ -43,8 +62,25 @@ class RadioStorage:
             )
         )
 
+
         return RadioState(
-            station=data.get("station", ""),
-            track=data.get("track"),
-            running=data.get("running", False),
+
+            station=data.get(
+                "station",
+                "",
+            ),
+
+            track=data.get(
+                "track"
+            ),
+
+            running=data.get(
+                "running",
+                False,
+            ),
+
+            mode=data.get(
+                "mode",
+                "random",
+            ),
         )

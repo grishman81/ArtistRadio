@@ -14,5 +14,9 @@ class RadioState:
     """
 
     station: str = ""
+
     track: Optional[str] = None
+
     running: bool = False
+
+    mode: str = "random"
