@@ -4,6 +4,7 @@ Console Controller
 """
 
 from src.radio.session import RadioSession
+from src.station.manager import StationManager
 
 
 class ConsoleApp:
@@ -11,8 +12,13 @@ class ConsoleApp:
     Консольный пульт управления радио.
     """
 
-    def __init__(self, session: RadioSession):
+    def __init__(
+        self,
+        session: RadioSession,
+        stations: StationManager,
+    ):
         self.session = session
+        self.stations = stations
 
     def run(self) -> None:
         while True:
@@ -25,7 +31,8 @@ class ConsoleApp:
             print("3. Resume")
             print("4. Stop")
             print("5. Current track")
-            print("6. Exit")
+            print("6. Change station")
+            print("7. Exit")
 
             command = input("> ").strip()
 
@@ -64,9 +71,61 @@ class ConsoleApp:
                     )
 
             elif command == "6":
+                self.change_station()
+
+            elif command == "7":
                 self.session.stop()
                 print("Bye")
                 break
 
             else:
-                print("Unknown command")
+                print(
+                    "Unknown command"
+                )
+
+    def change_station(self) -> None:
+        stations = self.stations.all()
+
+        if not stations:
+            print(
+                "No stations available"
+            )
+            return
+
+        print()
+        print("Available stations:")
+
+        for index, station in enumerate(
+            stations,
+            start=1,
+        ):
+            print(
+                f"{index}. {station.name}"
+            )
+
+        choice = input(
+            "Select station: "
+        ).strip()
+
+        try:
+            index = int(choice) - 1
+
+            station = stations[index]
+
+            self.session.switch_station(
+                station
+            )
+
+            self.session.start()
+
+            print(
+                f"Switched to: {station.name}"
+            )
+
+        except (
+            ValueError,
+            IndexError,
+        ):
+            print(
+                "Invalid station"
+            )

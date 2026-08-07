@@ -92,7 +92,8 @@ def main():
         session.start()
 
         console = ConsoleApp(
-            session
+            session,
+            stations,
         )
 
         console.run()
