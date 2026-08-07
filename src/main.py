@@ -18,9 +18,11 @@ from src.station.manager import StationManager
 
 from src.radio.engine import RadioEngine
 from src.radio.session import RadioSession
+from src.radio.storage import RadioStorage
 
 
 STATIONS_CONFIG = Path("config/stations.json")
+RADIO_STATE_FILE = Path("radio_state.json")
 
 
 def main():
@@ -66,8 +68,13 @@ def main():
             station
         )
 
+        storage = RadioStorage(
+            RADIO_STATE_FILE
+        )
+
         session = RadioSession(
-            radio
+            radio,
+            storage,
         )
 
         session.start()

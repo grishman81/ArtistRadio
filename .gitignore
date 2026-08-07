@@ -29,3 +29,7 @@ htmlcov/
 # Windows
 Thumbs.db
 Desktop.ini
+
+# Radio state
+radio_state.json
+test_radio_state.json
