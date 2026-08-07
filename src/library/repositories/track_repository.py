@@ -17,9 +17,13 @@ class TrackRepository:
     def _row_to_track(self, row) -> Track:
         return Track(
             id=row["id"],
+            artist=row["artist"] if "artist" in row.keys() else "",
+            album=row["album"] if "album" in row.keys() else "",
             title=row["title"],
             track=row["track"],
             disc=row["disc"],
+            year=row["year"] if "year" in row.keys() else None,
+            genre=row["genre"] if "genre" in row.keys() else None,
             duration=row["duration"],
             bitrate=row["bitrate"],
             sample_rate=row["sample_rate"],
@@ -62,8 +66,17 @@ class TrackRepository:
     def get_by_album(self, album_id: int):
         rows = self.db.connection.execute(
             """
-            SELECT *
+            SELECT
+                tracks.*,
+                albums.title AS album,
+                albums.year,
+                albums.genre,
+                artists.name AS artist
             FROM tracks
+            JOIN albums
+                ON tracks.album_id = albums.id
+            JOIN artists
+                ON albums.artist_id = artists.id
             WHERE album_id=?
             ORDER BY disc, track
             """,
@@ -78,10 +91,17 @@ class TrackRepository:
     def get_by_artist(self, artist_id: int):
         rows = self.db.connection.execute(
             """
-            SELECT tracks.*
+            SELECT
+                tracks.*,
+                albums.title AS album,
+                albums.year,
+                albums.genre,
+                artists.name AS artist
             FROM tracks
             JOIN albums
                 ON tracks.album_id = albums.id
+            JOIN artists
+                ON albums.artist_id = artists.id
             WHERE albums.artist_id=?
             ORDER BY albums.id, tracks.disc, tracks.track
             """,
@@ -96,9 +116,18 @@ class TrackRepository:
     def get_all(self):
         rows = self.db.connection.execute(
             """
-            SELECT *
+            SELECT
+                tracks.*,
+                albums.title AS album,
+                albums.year,
+                albums.genre,
+                artists.name AS artist
             FROM tracks
-            ORDER BY id
+            JOIN albums
+                ON tracks.album_id = albums.id
+            JOIN artists
+                ON albums.artist_id = artists.id
+            ORDER BY tracks.id
             """
         ).fetchall()
 
