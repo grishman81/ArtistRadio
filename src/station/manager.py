@@ -5,8 +5,8 @@ Station Manager
 
 from pathlib import Path
 
-from .station import Station
-from .loader import StationLoader
+from station.station import Station
+from station.loader import StationLoader
 
 
 class StationManager:

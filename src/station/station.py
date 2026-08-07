@@ -6,9 +6,9 @@ Station
 from dataclasses import dataclass, field
 from typing import Optional
 
-from ..library.library import Library
-from ..library.models import Track
-from ..playlist.engine import PlaylistEngine
+from library.library import Library
+from library.models import Track
+from playlist.engine import PlaylistEngine
 
 
 @dataclass

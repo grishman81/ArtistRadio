@@ -6,7 +6,7 @@ Station Loader
 import json
 from pathlib import Path
 
-from .station import Station
+from station.station import Station
 
 
 class StationLoader:
