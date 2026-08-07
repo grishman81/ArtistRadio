@@ -22,7 +22,6 @@ STATIONS_CONFIG = Path("config/stations.json")
 
 
 def main():
-
     manager = LibraryManager(
         music_root=config.MUSIC_ROOT,
         database_folder=config.DATABASE_FOLDER,
@@ -35,7 +34,9 @@ def main():
 
         history = PlaylistHistory()
 
-        randomizer = PlaylistRandomizer(history)
+        randomizer = PlaylistRandomizer(
+            history
+        )
 
         playlist = PlaylistEngine(
             randomizer,
@@ -57,7 +58,9 @@ def main():
 
         station = stations.all()[0]
 
-        radio = RadioEngine(station)
+        radio = RadioEngine(
+            station
+        )
 
         radio.start()
 
