@@ -15,6 +15,7 @@ from src.playlist.randomizer import PlaylistRandomizer
 from src.playlist.engine import PlaylistEngine
 
 from src.station.manager import StationManager
+from src.station.generator import StationGenerator
 
 from src.radio.engine import RadioEngine
 from src.radio.session import RadioSession
@@ -35,6 +36,7 @@ RADIO_STATE_FILE = Path(
 
 
 def main():
+
     manager = LibraryManager(
         music_root=config.MUSIC_ROOT,
         database_folder=config.DATABASE_FOLDER,
@@ -63,9 +65,18 @@ def main():
             playlist,
         )
 
-        stations.load_from_file(
-            STATIONS_CONFIG
+        # Автоматические станции из библиотеки
+        generator = StationGenerator(
+            library,
+            playlist,
         )
+
+        generated = generator.generate()
+
+        for station in generated:
+            stations.add(
+                station
+            )
 
         print(
             f"Loaded stations: {stations.count}"
