@@ -17,6 +17,8 @@ from src.radio.engine import RadioEngine
 from src.radio.session import RadioSession
 from src.radio.storage import RadioStorage
 
+from src.audio.player import AudioPlayer
+
 
 def create_session():
     library = Library(
@@ -49,9 +51,12 @@ def create_session():
         Path("test_radio_state.json")
     )
 
+    player = AudioPlayer()
+
     return RadioSession(
         radio,
         storage,
+        player,
     )
 
 
@@ -80,5 +85,7 @@ def test_radio_session_play_next():
         session.state.track
         == str(track.path)
     )
+
+    assert session.player.current == track.path
 
     session.stop()
