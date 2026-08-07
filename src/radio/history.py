@@ -7,6 +7,8 @@ import json
 
 from pathlib import Path
 
+from src.library.models import Track
+
 
 class PlaybackHistory:
 
@@ -17,17 +19,25 @@ class PlaybackHistory:
     ):
         self.path = path
         self.limit = limit
-        self._items: list[str] = []
+        self._items: list[dict] = []
 
         self.load()
 
     def add(
         self,
-        track: str,
+        track: Track,
     ) -> None:
 
+        item = {
+            "artist": track.artist,
+            "album": track.album,
+            "title": track.title,
+            "year": track.year,
+            "path": str(track.path),
+        }
+
         self._items.append(
-            track
+            item
         )
 
         if len(self._items) > self.limit:
@@ -35,7 +45,7 @@ class PlaybackHistory:
 
         self.save()
 
-    def items(self) -> list[str]:
+    def items(self) -> list[dict]:
         return list(
             reversed(self._items)
         )
@@ -60,8 +70,10 @@ class PlaybackHistory:
         if not self.path.exists():
             return
 
-        self._items = json.loads(
+        data = json.loads(
             self.path.read_text(
                 encoding="utf-8"
             )
         )
+
+        self._items = data
