@@ -26,13 +26,49 @@ from src.audio.player import AudioPlayer
 from src.console.app import ConsoleApp
 
 
-STATIONS_CONFIG = Path(
-    "config/stations.json"
-)
-
 RADIO_STATE_FILE = Path(
     "radio_state.json"
 )
+
+
+def select_station(
+    stations: StationManager
+):
+    available = stations.all()
+
+    if not available:
+        raise RuntimeError(
+            "No stations available"
+        )
+
+    print()
+    print("Available stations:")
+
+    for index, station in enumerate(
+        available,
+        start=1,
+    ):
+        print(
+            f"{index}. {station.name}"
+        )
+
+    while True:
+        choice = input(
+            "Select station: "
+        ).strip()
+
+        try:
+            index = int(choice) - 1
+
+            return available[index]
+
+        except (
+            ValueError,
+            IndexError,
+        ):
+            print(
+                "Invalid selection"
+            )
 
 
 def main():
@@ -65,15 +101,12 @@ def main():
             playlist,
         )
 
-        # Автоматические станции из библиотеки
         generator = StationGenerator(
             library,
             playlist,
         )
 
-        generated = generator.generate()
-
-        for station in generated:
+        for station in generator.generate():
             stations.add(
                 station
             )
@@ -82,7 +115,9 @@ def main():
             f"Loaded stations: {stations.count}"
         )
 
-        station = stations.all()[0]
+        station = select_station(
+            stations
+        )
 
         radio = RadioEngine(
             station
