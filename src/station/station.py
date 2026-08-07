@@ -3,7 +3,7 @@ ArtistRadio Engine
 Station
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 from ..library.library import Library
@@ -26,6 +26,8 @@ class Station:
 
     current_track: Optional[Track] = None
 
+    history: list[Track] = field(default_factory=list)
+
     def next_track(self) -> Optional[Track]:
         """
         Выбирает следующий трек станции.
@@ -36,6 +38,29 @@ class Station:
         if not tracks:
             return None
 
-        self.current_track = self.playlist.next_track(tracks)
+        track = self.playlist.next_track(tracks)
 
-        return self.current_track
+        if track is None:
+            return None
+
+        self.current_track = track
+        self.add_history(track)
+
+        return track
+
+    def skip(self) -> Optional[Track]:
+        """
+        Пропустить текущий трек.
+        """
+
+        return self.next_track()
+
+    def add_history(self, track: Track) -> None:
+        """
+        Добавляет трек в историю эфира.
+        """
+
+        self.history.append(track)
+
+        if len(self.history) > 100:
+            self.history.pop(0)
