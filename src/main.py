@@ -5,16 +5,16 @@ Main
 
 from pathlib import Path
 
-from config import MUSIC_ROOT, DATABASE_FOLDER
+from src import config
 
-from library.manager import LibraryManager
-from library.library import Library
+from src.library.manager import LibraryManager
+from src.library.library import Library
 
-from playlist.history import PlaylistHistory
-from playlist.randomizer import PlaylistRandomizer
-from playlist.engine import PlaylistEngine
+from src.playlist.history import PlaylistHistory
+from src.playlist.randomizer import PlaylistRandomizer
+from src.playlist.engine import PlaylistEngine
 
-from station.manager import StationManager
+from src.station.manager import StationManager
 
 
 STATIONS_CONFIG = Path("config/stations.json")
@@ -22,14 +22,14 @@ STATIONS_CONFIG = Path("config/stations.json")
 
 def main():
     manager = LibraryManager(
-        music_root=MUSIC_ROOT,
-        database_folder=DATABASE_FOLDER,
-    )
+    music_root=config.MUSIC_ROOT,
+    database_folder=config.DATABASE_FOLDER,
+)
 
     try:
         manager.build()
 
-        library = Library(DATABASE_FOLDER)
+        library = Library(config.DATABASE_FOLDER)
 
         history = PlaylistHistory()
 
