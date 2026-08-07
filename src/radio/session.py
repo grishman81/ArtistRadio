@@ -79,7 +79,7 @@ class RadioSession:
             )
 
             self.history.add(
-                str(track.path)
+                track
             )
 
             self.save()
