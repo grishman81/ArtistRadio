@@ -28,7 +28,7 @@ from src.audio.player import AudioPlayer
 from src.console.app import ConsoleApp
 
 
-VERSION = "0.5.0"
+VERSION = "0.5.1"
 
 
 RADIO_STATE_FILE = Path(
@@ -54,6 +54,9 @@ Usage:
   python -m src.main --scan
       Rebuild music library
 
+  python -m src.main --info
+      Show library information
+
   python -m src.main --help
       Show help
 
@@ -63,6 +66,54 @@ Usage:
     )
 
 
+def show_info():
+
+    library = Library(
+        config.DATABASE_FOLDER
+    )
+
+    stations = StationManager(
+        library,
+        None,
+    )
+
+    generator = StationGenerator(
+        library,
+        None,
+    )
+
+    for station in generator.generate():
+
+        stations.add(
+            station
+        )
+
+    print()
+    print(
+        f"ArtistRadio v{VERSION}"
+    )
+
+    print()
+    print("Library:")
+    print(
+        f"  Artists: {len(library.get_artists())}"
+    )
+    print(
+        f"  Tracks: {library.count_tracks()}"
+    )
+
+    print()
+    print("Stations:")
+
+    for station in stations.all():
+
+        print(
+            f"  {station.name}"
+        )
+
+    library.close()
+
+
 def handle_cli():
 
     if "--help" in sys.argv:
@@ -70,12 +121,20 @@ def handle_cli():
         show_help()
         return True
 
+
     if "--version" in sys.argv:
 
         print(
             f"ArtistRadio v{VERSION}"
         )
         return True
+
+
+    if "--info" in sys.argv:
+
+        show_info()
+        return True
+
 
     return False
 
@@ -93,9 +152,11 @@ def select_station(
         available,
         start=1,
     ):
+
         print(
             f"{index}. {station.name}"
         )
+
 
     while True:
 
@@ -129,12 +190,14 @@ def restore_station(
     if not state.station:
         return None
 
+
     station = stations.get(
         state.station
     )
 
     if station is None:
         return None
+
 
     print()
     print(
@@ -147,12 +210,16 @@ def restore_station(
         "2. Choose another"
     )
 
+
     choice = input(
         "> "
     ).strip()
 
+
     if choice == "1":
+
         return station
+
 
     return None
 
@@ -167,6 +234,7 @@ def rebuild_library():
     if database.exists():
 
         database.unlink()
+
 
     manager = LibraryManager(
         music_root=config.MUSIC_ROOT,
@@ -209,40 +277,49 @@ def main():
         database_folder=config.DATABASE_FOLDER,
     )
 
+
     try:
 
         manager.build()
+
 
         library = Library(
             config.DATABASE_FOLDER
         )
 
+
         playlist_history = PlaylistHistory()
+
 
         randomizer = PlaylistRandomizer(
             playlist_history
         )
+
 
         playlist = PlaylistEngine(
             randomizer,
             playlist_history,
         )
 
+
         stations = StationManager(
             library,
             playlist,
         )
+
 
         generator = StationGenerator(
             library,
             playlist,
         )
 
+
         for station in generator.generate():
 
             stations.add(
                 station
             )
+
 
         print(
             f"Loaded stations: {stations.count}"
@@ -252,6 +329,7 @@ def main():
         storage = RadioStorage(
             RADIO_STATE_FILE
         )
+
 
         playback_history = PlaybackHistory(
             RADIO_HISTORY_FILE
@@ -282,6 +360,7 @@ def main():
             station
         )
 
+
         player = AudioPlayer()
 
 
@@ -311,6 +390,7 @@ def main():
             session,
             stations,
         )
+
 
         console.run()
 
