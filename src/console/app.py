@@ -15,13 +15,17 @@ class ConsoleApp:
         session: RadioSession,
         stations: StationManager,
     ):
+
         self.session = session
         self.stations = stations
+
 
 
     def run(self) -> None:
 
         while True:
+
+            self.session.check_playback()
 
             print()
             print("====================")
@@ -37,7 +41,11 @@ class ConsoleApp:
             print("8. History")
             print("9. Exit")
 
-            command = input("> ").strip()
+
+            command = input(
+                "> "
+            ).strip()
+
 
 
             if command == "1":
@@ -45,27 +53,41 @@ class ConsoleApp:
                 track = self.session.play_next()
 
                 if track:
+
                     print(
                         f"Now playing: {track.title}"
                     )
 
 
+
             elif command == "2":
 
                 self.session.player.pause()
-                print("Paused")
+
+                print(
+                    "Paused"
+                )
+
 
 
             elif command == "3":
 
                 self.session.player.resume()
-                print("Resumed")
+
+                print(
+                    "Resumed"
+                )
+
 
 
             elif command == "4":
 
                 self.session.stop()
-                print("Stopped")
+
+                print(
+                    "Stopped"
+                )
+
 
 
             elif command == "5":
@@ -74,15 +96,19 @@ class ConsoleApp:
                     self.session.player.current_track()
                 )
 
+
                 if track:
+
                     print(
-                        f"Current: {track.title}"
+                        f"Current: {track}"
                     )
 
                 else:
+
                     print(
                         "Nothing playing"
                     )
+
 
 
             elif command == "6":
@@ -90,9 +116,11 @@ class ConsoleApp:
                 self.change_station()
 
 
+
             elif command == "7":
 
                 self.change_mode()
+
 
 
             elif command == "8":
@@ -100,11 +128,17 @@ class ConsoleApp:
                 self.show_history()
 
 
+
             elif command == "9":
 
                 self.session.stop()
-                print("Bye")
+
+                print(
+                    "Bye"
+                )
+
                 break
+
 
 
             else:
@@ -121,20 +155,37 @@ class ConsoleApp:
             self.session.radio.station
         )
 
+
         print()
+
         print(
             f"Current station: {station.name}"
         )
 
+
         print()
-        print("Select mode:")
-        print("1. Random")
-        print("2. Sequential")
-        print("3. Album Flow")
+
+        print(
+            "Select mode:"
+        )
+
+        print(
+            "1. Random"
+        )
+
+        print(
+            "2. Sequential"
+        )
+
+        print(
+            "3. Album Flow"
+        )
+
 
         choice = input(
             "> "
         ).strip()
+
 
 
         if choice == "1":
@@ -143,12 +194,22 @@ class ConsoleApp:
                 PlaylistMode.RANDOM
             )
 
+            print(
+                "Mode changed: Random"
+            )
+
+
 
         elif choice == "2":
 
             station.set_mode(
                 PlaylistMode.SEQUENTIAL
             )
+
+            print(
+                "Mode changed: Sequential"
+            )
+
 
 
         elif choice == "3":
@@ -157,6 +218,11 @@ class ConsoleApp:
                 PlaylistMode.ALBUM
             )
 
+            print(
+                "Mode changed: Album Flow"
+            )
+
+
 
         else:
 
@@ -164,27 +230,18 @@ class ConsoleApp:
                 "Invalid mode"
             )
 
-            return
-
-
-        self.session.state.mode = (
-            station.get_mode().value
-        )
-
-        self.session.save()
-
-
-        print(
-            f"Mode changed: {station.get_mode().name.title()}"
-        )
-
 
 
     def show_history(self):
 
         print()
-        print("Playback history:")
+
+        print(
+            "Playback history:"
+        )
+
         print()
+
 
         history = self.session.history.items()
 
@@ -196,6 +253,7 @@ class ConsoleApp:
             )
 
             return
+
 
 
         for index, item in enumerate(
@@ -218,17 +276,22 @@ class ConsoleApp:
             print()
 
 
+
         choice = input(
             "Select track (0 cancel): "
         ).strip()
+
 
 
         try:
 
             number = int(choice)
 
+
             if number == 0:
+
                 return
+
 
 
             track = self.session.play_history_item(
@@ -241,6 +304,7 @@ class ConsoleApp:
                 print(
                     f"Now playing: {track.title}"
                 )
+
 
 
         except ValueError:
@@ -265,8 +329,13 @@ class ConsoleApp:
             return
 
 
+
         print()
-        print("Available stations:")
+
+        print(
+            "Available stations:"
+        )
+
 
 
         for index, station in enumerate(
@@ -279,9 +348,11 @@ class ConsoleApp:
             )
 
 
+
         choice = input(
             "Select station: "
         ).strip()
+
 
 
         try:
@@ -295,12 +366,14 @@ class ConsoleApp:
                 station
             )
 
+
             self.session.start()
 
 
             print(
                 f"Switched to: {station.name}"
             )
+
 
 
         except (
