@@ -12,6 +12,7 @@ from src.radio.storage import RadioStorage
 from src.radio.history import PlaybackHistory
 
 from src.audio.player import AudioPlayer
+from src.audio.crossfade import CrossfadeEngine
 
 from src.station.station import Station
 
@@ -33,10 +34,14 @@ class RadioSession:
         self.player = player
         self.history = history
 
+        self.crossfade = CrossfadeEngine()
+
+
         self.state = RadioState(
             station=radio.station.name,
             mode=radio.station.get_mode().value,
         )
+
 
         self.save()
 
@@ -83,6 +88,13 @@ class RadioSession:
             return None
 
 
+        if self.player.is_playing():
+
+            self.crossfade.fade_out_old(
+                self.player
+            )
+
+
         track = self.radio.next()
 
 
@@ -97,6 +109,11 @@ class RadioSession:
 
             self.player.play(
                 track.path
+            )
+
+
+            self.crossfade.fade_in_new(
+                self.player
             )
 
 
@@ -179,11 +196,9 @@ class RadioSession:
                     self.state.position,
                 )
 
-
                 self.history.add(
                     track
                 )
-
 
                 return track
 
