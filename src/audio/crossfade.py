@@ -3,26 +3,20 @@ ArtistRadio Engine
 Crossfade Engine
 """
 
-import time
-
 
 class CrossfadeEngine:
-    """
-    Controls track transitions.
-    """
+
 
     def __init__(
         self,
-        duration: int = 5,
+        duration: float = 5.0,
     ):
 
         self.duration = duration
 
+        self.elapsed_time = 0.0
+
         self.active = False
-
-        self.start_time = None
-
-        self.elapsed_time = 0
 
 
 
@@ -30,11 +24,7 @@ class CrossfadeEngine:
 
         self.active = True
 
-        self.start_time = time.time()
-
-        self.elapsed_time = 0
-
-        return True
+        self.elapsed_time = 0.0
 
 
 
@@ -42,48 +32,41 @@ class CrossfadeEngine:
 
         self.active = False
 
-        self.start_time = None
-
-        self.elapsed_time = 0
-
-        return True
+        self.elapsed_time = 0.0
 
 
 
-    def elapsed(self):
-
-        if not self.active:
-
-            return self.elapsed_time
-
-
-        if self.elapsed_time >= self.duration:
-
-            return self.elapsed_time
-
-
-        if self.start_time is None:
-
-            return 0
-
-
-        return (
-            time.time()
-            -
-            self.start_time
-        )
-
-
-
-    def progress(self):
+    def tick(
+        self,
+        seconds: float,
+    ):
 
         if not self.active:
 
             return 0.0
 
 
+        self.elapsed_time += seconds
+
+
+        if self.elapsed_time >= self.duration:
+
+            self.elapsed_time = self.duration
+
+
+        return self.progress()
+
+
+
+    def progress(self):
+
+        if self.duration <= 0:
+
+            return 1.0
+
+
         value = (
-            self.elapsed()
+            self.elapsed_time
             /
             self.duration
         )
@@ -99,9 +82,19 @@ class CrossfadeEngine:
 
 
 
+    def is_complete(self):
+
+        return (
+            self.active
+            and
+            self.elapsed_time >= self.duration
+        )
+
+
+
     def update(
         self,
-        elapsed: float | None = None,
+        elapsed: float = None,
     ):
 
         if elapsed is not None:
@@ -109,51 +102,20 @@ class CrossfadeEngine:
             self.elapsed_time = elapsed
 
 
-        if self.duration <= 0:
-
-            progress = 1.0
-
-        else:
-
-            progress = (
-                self.elapsed_time
-                /
-                self.duration
-            )
-
-
-        progress = max(
-            0.0,
-            min(
-                1.0,
-                progress,
-            )
-        )
+        value = self.progress()
 
 
         return {
             "old": round(
-                1.0 - progress,
-                2,
+                1.0 - value,
+                10,
             ),
 
             "new": round(
-                progress,
-                2,
+                value,
+                10,
             ),
         }
-
-
-
-    def is_complete(self):
-
-        return (
-            self.progress()
-            >=
-            1.0
-            or
-            self.elapsed_time >= self.duration
-        )
 
 
 
@@ -162,11 +124,7 @@ class CrossfadeEngine:
         player,
     ):
 
-        self.start()
-
-        player.fade_out(
-            steps=self.duration
-        )
+        player.fade_out()
 
 
 
@@ -175,8 +133,4 @@ class CrossfadeEngine:
         player,
     ):
 
-        player.fade_in(
-            steps=self.duration
-        )
-
-        self.stop()
+        player.fade_in()
