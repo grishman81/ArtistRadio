@@ -21,6 +21,7 @@ from src.library.models import Track
 
 class RadioSession:
 
+
     def __init__(
         self,
         radio: RadioEngine,
@@ -94,6 +95,64 @@ class RadioSession:
         self.player.apply_volume(
             levels["new"]
         )
+
+
+        return levels
+
+
+
+    def transition_to_next_track(
+        self,
+        track: Track,
+        elapsed: float = 0.0,
+    ):
+
+        if track is None:
+
+            return None
+
+
+        self.player.play_secondary(
+            track.path
+        )
+
+
+        self.crossfade.start()
+
+
+        levels = self.crossfade.update(
+            elapsed
+        )
+
+
+        self.player.apply_volume(
+            levels["new"]
+        )
+
+
+        if self.crossfade.is_complete():
+
+            self.player.stop()
+
+            self.player.play(
+                track.path
+            )
+
+            self.player.stop_secondary()
+
+
+            self.state.track = str(
+                track.path
+            )
+
+            self.state.position = 0.0
+
+
+            self.history.add(
+                track
+            )
+
+            self.save()
 
 
         return levels
