@@ -81,6 +81,25 @@ class RadioSession:
 
 
 
+    def apply_crossfade(
+        self,
+        elapsed: float,
+    ):
+
+        levels = self.crossfade.update(
+            elapsed
+        )
+
+
+        self.player.apply_volume(
+            levels["new"]
+        )
+
+
+        return levels
+
+
+
     def play_next(self) -> Optional[Track]:
 
         if not self.state.running:
@@ -109,6 +128,14 @@ class RadioSession:
 
             self.player.play(
                 track.path
+            )
+
+
+            self.crossfade.start()
+
+
+            self.apply_crossfade(
+                0
             )
 
 
