@@ -32,7 +32,8 @@ class ConsoleApp:
             print("4. Stop")
             print("5. Current track")
             print("6. Change station")
-            print("7. Exit")
+            print("7. History")
+            print("8. Exit")
 
             command = input("> ").strip()
 
@@ -74,6 +75,9 @@ class ConsoleApp:
                 self.change_station()
 
             elif command == "7":
+                self.show_history()
+
+            elif command == "8":
                 self.session.stop()
                 print("Bye")
                 break
@@ -82,6 +86,26 @@ class ConsoleApp:
                 print(
                     "Unknown command"
                 )
+
+    def show_history(self) -> None:
+        station = self.session.radio.station
+
+        print()
+        print("Playback history:")
+
+        if not station.history:
+            print(
+                "History is empty"
+            )
+            return
+
+        for index, track in enumerate(
+            reversed(station.history),
+            start=1,
+        ):
+            print(
+                f"{index}. {track.title}"
+            )
 
     def change_station(self) -> None:
         stations = self.stations.all()
