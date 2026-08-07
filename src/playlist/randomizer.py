@@ -6,30 +6,49 @@ Playlist Randomizer
 import random
 
 from src.library.models import Track
+
 from .history import PlaylistHistory
 
 
 class PlaylistRandomizer:
-    """
-    Выбирает случайный трек, которого нет в истории.
-    """
 
-    def __init__(self, history: PlaylistHistory):
+    def __init__(
+        self,
+        history: PlaylistHistory,
+        avoid_last: int = 5,
+    ):
         self.history = history
+        self.avoid_last = avoid_last
 
-    def choose(self, tracks: list[Track]) -> Track | None:
+
+    def choose(
+        self,
+        tracks: list[Track],
+    ) -> Track | None:
 
         if not tracks:
             return None
 
+
+        recent = set(
+            self.history.items()[
+                -self.avoid_last:
+            ]
+        )
+
+
         candidates = [
             track
             for track in tracks
-            if not self.history.contains(track.path)
+            if str(track.path)
+            not in recent
         ]
 
+
         if not candidates:
-            self.history.clear()
             candidates = tracks
 
-        return random.choice(candidates)
+
+        return random.choice(
+            candidates
+        )
