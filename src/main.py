@@ -31,15 +31,9 @@ RADIO_STATE_FILE = Path(
 )
 
 
-def select_station(
-    stations: StationManager
-):
-    available = stations.all()
+def select_station(stations):
 
-    if not available:
-        raise RuntimeError(
-            "No stations available"
-        )
+    available = stations.all()
 
     print()
     print("Available stations:")
@@ -55,12 +49,12 @@ def select_station(
     while True:
         choice = input(
             "Select station: "
-        ).strip()
+        )
 
         try:
-            index = int(choice) - 1
-
-            return available[index]
+            return available[
+                int(choice) - 1
+            ]
 
         except (
             ValueError,
@@ -71,6 +65,43 @@ def select_station(
             )
 
 
+def restore_station(
+    stations,
+    storage,
+):
+    state = storage.load()
+
+    if not state.station:
+        return None
+
+    station = stations.get(
+        state.station
+    )
+
+    if not station:
+        return None
+
+    print()
+    print(
+        f"Last station: {station.name}"
+    )
+    print(
+        "1. Continue"
+    )
+    print(
+        "2. Choose another"
+    )
+
+    choice = input(
+        "> "
+    )
+
+    if choice == "1":
+        return station
+
+    return None
+
+
 def main():
 
     manager = LibraryManager(
@@ -79,6 +110,7 @@ def main():
     )
 
     try:
+
         manager.build()
 
         library = Library(
@@ -115,16 +147,22 @@ def main():
             f"Loaded stations: {stations.count}"
         )
 
-        station = select_station(
-            stations
+        storage = RadioStorage(
+            RADIO_STATE_FILE
         )
+
+        station = restore_station(
+            stations,
+            storage,
+        )
+
+        if station is None:
+            station = select_station(
+                stations
+            )
 
         radio = RadioEngine(
             station
-        )
-
-        storage = RadioStorage(
-            RADIO_STATE_FILE
         )
 
         player = AudioPlayer()
