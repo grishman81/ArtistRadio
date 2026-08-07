@@ -19,18 +19,19 @@ class Station:
 
     name: str
     artist: str
+    library: Library
     playlist: PlaylistEngine
 
     bitrate: int = 320
 
     current_track: Optional[Track] = None
 
-    def next_track(self, library: Library) -> Optional[Track]:
+    def next_track(self) -> Optional[Track]:
         """
         Выбирает следующий трек станции.
         """
 
-        tracks = library.get_tracks(self.artist)
+        tracks = self.library.get_tracks(self.artist)
 
         if not tracks:
             return None
