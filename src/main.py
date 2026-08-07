@@ -14,6 +14,7 @@ from src.library.library import Library
 from src.playlist.history import PlaylistHistory
 from src.playlist.randomizer import PlaylistRandomizer
 from src.playlist.engine import PlaylistEngine
+from src.playlist.mode import PlaylistMode
 
 from src.station.manager import StationManager
 from src.station.generator import StationGenerator
@@ -199,9 +200,24 @@ def restore_station(
         return None
 
 
+    try:
+
+        station.set_mode(
+            PlaylistMode(state.mode)
+        )
+
+    except ValueError:
+
+        station.set_mode(
+            PlaylistMode.RANDOM
+        )
+
     print()
     print(
         f"Last station: {station.name}"
+    )
+    print(
+        f"Mode: {station.get_mode().name.title()}"
     )
     print(
         "1. Continue"
