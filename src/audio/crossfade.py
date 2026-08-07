@@ -3,6 +3,8 @@ ArtistRadio Engine
 Crossfade Engine
 """
 
+import time
+
 
 class CrossfadeEngine:
     """
@@ -18,11 +20,19 @@ class CrossfadeEngine:
 
         self.active = False
 
+        self.start_time = None
+
+        self.elapsed_time = 0
+
 
 
     def start(self):
 
         self.active = True
+
+        self.start_time = time.time()
+
+        self.elapsed_time = 0
 
         return True
 
@@ -32,7 +42,70 @@ class CrossfadeEngine:
 
         self.active = False
 
+        self.start_time = None
+
+        self.elapsed_time = 0
+
         return True
+
+
+
+    def elapsed(self):
+
+        if not self.active:
+
+            return self.elapsed_time
+
+
+        if self.elapsed_time >= self.duration:
+
+            return self.elapsed_time
+
+
+        if self.start_time is None:
+
+            return 0
+
+
+        return (
+            time.time()
+            -
+            self.start_time
+        )
+
+
+
+    def progress(self):
+
+        if not self.active:
+
+            return 0.0
+
+
+        value = (
+            self.elapsed()
+            /
+            self.duration
+        )
+
+
+        return max(
+            0.0,
+            min(
+                1.0,
+                value,
+            )
+        )
+
+
+
+    def is_complete(self):
+
+        return (
+            self.progress()
+            >=
+            1.0
+        )
 
 
 
