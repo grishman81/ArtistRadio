@@ -129,6 +129,7 @@ class ConsoleApp:
         print("Select mode:")
         print("1. Random")
         print("2. Sequential")
+        print("3. Album Flow")
 
         choice = input(
             "> "
@@ -154,6 +155,17 @@ class ConsoleApp:
 
             print(
                 "Mode changed: Sequential"
+            )
+
+
+        elif choice == "3":
+
+            station.set_mode(
+                PlaylistMode.ALBUM
+            )
+
+            print(
+                "Mode changed: Album Flow"
             )
 
 
