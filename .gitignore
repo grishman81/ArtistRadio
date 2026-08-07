@@ -33,3 +33,8 @@ Desktop.ini
 # Radio state
 radio_state.json
 test_radio_state.json
+
+# Radio history
+
+radio_history.json
+test_radio_history.json
