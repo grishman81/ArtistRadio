@@ -9,19 +9,16 @@ from pathlib import Path
 
 class AudioPlayer:
     """
-    Реальный аудиоплеер через ffplay.
+    Управление воспроизведением через ffplay.
     """
 
     def __init__(self):
         self.current: Path | None = None
         self.process = None
         self.playing = False
+        self.paused = False
 
     def play(self, path: Path) -> None:
-        """
-        Запускает воспроизведение файла.
-        """
-
         self.stop()
 
         self.current = path
@@ -38,17 +35,26 @@ class AudioPlayer:
         )
 
         self.playing = True
+        self.paused = False
 
     def stop(self) -> None:
-        """
-        Останавливает воспроизведение.
-        """
-
         if self.process:
             self.process.terminate()
             self.process = None
 
         self.playing = False
+        self.paused = False
+
+    def pause(self) -> None:
+        if self.playing:
+            self.paused = True
+
+    def resume(self) -> None:
+        if self.playing:
+            self.paused = False
 
     def is_playing(self) -> bool:
         return self.playing
+
+    def current_track(self) -> Path | None:
+        return self.current
