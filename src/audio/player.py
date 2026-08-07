@@ -28,6 +28,8 @@ class AudioPlayer:
 
         self.position: float = 0.0
 
+        self.volume: float = 1.0
+
 
 
     def play(
@@ -37,7 +39,6 @@ class AudioPlayer:
     ) -> None:
 
         self.stop()
-
 
         self.current = path
 
@@ -127,6 +128,15 @@ class AudioPlayer:
 
 
 
+    def seek(
+        self,
+        position: float,
+    ) -> None:
+
+        self.position = position
+
+
+
     def current_position(self) -> float:
 
         if not self.playing:
@@ -154,12 +164,72 @@ class AudioPlayer:
 
 
 
-    def seek(
+    def set_volume(
         self,
-        position: float,
+        volume: float,
     ) -> None:
 
-        self.position = position
+        self.volume = max(
+            0.0,
+            min(
+                1.0,
+                volume,
+            )
+        )
+
+
+
+    def fade_out(
+        self,
+        steps: int = 10,
+    ) -> None:
+
+        if steps <= 0:
+
+            self.volume = 0.0
+
+            return
+
+
+        step = (
+            self.volume / steps
+        )
+
+
+        for _ in range(steps):
+
+            self.volume -= step
+
+
+        self.volume = 0.0
+
+
+
+    def fade_in(
+        self,
+        steps: int = 10,
+    ) -> None:
+
+        if steps <= 0:
+
+            self.volume = 1.0
+
+            return
+
+
+        step = (
+            (1.0 - self.volume)
+            /
+            steps
+        )
+
+
+        for _ in range(steps):
+
+            self.volume += step
+
+
+        self.volume = 1.0
 
 
 
