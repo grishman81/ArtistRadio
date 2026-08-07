@@ -15,16 +15,18 @@ from src.playlist.randomizer import PlaylistRandomizer
 from src.playlist.engine import PlaylistEngine
 
 from src.station.manager import StationManager
+from src.radio.engine import RadioEngine
 
 
 STATIONS_CONFIG = Path("config/stations.json")
 
 
 def main():
+
     manager = LibraryManager(
-    music_root=config.MUSIC_ROOT,
-    database_folder=config.DATABASE_FOLDER,
-)
+        music_root=config.MUSIC_ROOT,
+        database_folder=config.DATABASE_FOLDER,
+    )
 
     try:
         manager.build()
@@ -52,6 +54,19 @@ def main():
         print(
             f"Loaded stations: {stations.count}"
         )
+
+        station = stations.all()[0]
+
+        radio = RadioEngine(station)
+
+        radio.start()
+
+        track = radio.next()
+
+        if track:
+            print(
+                f"Now playing: {track.title}"
+            )
 
     finally:
         manager.close()
