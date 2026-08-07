@@ -5,6 +5,7 @@ Console Controller
 
 from src.radio.session import RadioSession
 from src.station.manager import StationManager
+from src.playlist.mode import PlaylistMode
 
 
 class ConsoleApp:
@@ -16,6 +17,7 @@ class ConsoleApp:
     ):
         self.session = session
         self.stations = stations
+
 
     def run(self) -> None:
 
@@ -31,10 +33,12 @@ class ConsoleApp:
             print("4. Stop")
             print("5. Current track")
             print("6. Change station")
-            print("7. History")
-            print("8. Exit")
+            print("7. Change mode")
+            print("8. History")
+            print("9. Exit")
 
             command = input("> ").strip()
+
 
             if command == "1":
 
@@ -45,20 +49,24 @@ class ConsoleApp:
                         f"Now playing: {track.title}"
                     )
 
+
             elif command == "2":
 
                 self.session.player.pause()
                 print("Paused")
+
 
             elif command == "3":
 
                 self.session.player.resume()
                 print("Resumed")
 
+
             elif command == "4":
 
                 self.session.stop()
                 print("Stopped")
+
 
             elif command == "5":
 
@@ -70,30 +78,91 @@ class ConsoleApp:
                     print(
                         f"Current: {track.title}"
                     )
+
                 else:
                     print(
                         "Nothing playing"
                     )
 
+
             elif command == "6":
 
                 self.change_station()
 
+
             elif command == "7":
+
+                self.change_mode()
+
+
+            elif command == "8":
 
                 self.show_history()
 
-            elif command == "8":
+
+            elif command == "9":
 
                 self.session.stop()
                 print("Bye")
                 break
+
 
             else:
 
                 print(
                     "Unknown command"
                 )
+
+
+    def change_mode(self):
+
+        station = (
+            self.session.radio.station
+        )
+
+        print()
+        print(
+            f"Current station: {station.name}"
+        )
+
+        print()
+        print("Select mode:")
+        print("1. Random")
+        print("2. Sequential")
+
+        choice = input(
+            "> "
+        ).strip()
+
+
+        if choice == "1":
+
+            station.set_mode(
+                PlaylistMode.RANDOM
+            )
+
+            print(
+                "Mode changed: Random"
+            )
+
+
+        elif choice == "2":
+
+            station.set_mode(
+                PlaylistMode.SEQUENTIAL
+            )
+
+            print(
+                "Mode changed: Sequential"
+            )
+
+
+        else:
+
+            print(
+                "Invalid mode"
+            )
+
 
     def show_history(self):
 
@@ -111,6 +180,7 @@ class ConsoleApp:
 
             return
 
+
         for index, item in enumerate(
             history,
             start=1,
@@ -119,17 +189,22 @@ class ConsoleApp:
             print(
                 f"{index}. {item['artist']}"
             )
+
             print(
                 f"   {item['title']}"
             )
+
             print(
                 f"   {item['album']}"
             )
+
             print()
+
 
         choice = input(
             "Select track (0 cancel): "
         ).strip()
+
 
         try:
 
@@ -138,9 +213,11 @@ class ConsoleApp:
             if number == 0:
                 return
 
+
             track = self.session.play_history_item(
                 number - 1
             )
+
 
             if track:
 
@@ -148,36 +225,46 @@ class ConsoleApp:
                     f"Now playing: {track.title}"
                 )
 
+
         except ValueError:
 
             print(
                 "Invalid selection"
             )
 
+
     def change_station(self):
 
         stations = self.stations.all()
 
+
         if not stations:
+
             print(
                 "No stations available"
             )
+
             return
+
 
         print()
         print("Available stations:")
+
 
         for index, station in enumerate(
             stations,
             start=1,
         ):
+
             print(
                 f"{index}. {station.name}"
             )
 
+
         choice = input(
             "Select station: "
         ).strip()
+
 
         try:
 
@@ -185,15 +272,18 @@ class ConsoleApp:
                 int(choice) - 1
             ]
 
+
             self.session.switch_station(
                 station
             )
 
             self.session.start()
 
+
             print(
                 f"Switched to: {station.name}"
             )
+
 
         except (
             ValueError,
