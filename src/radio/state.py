@@ -10,7 +10,7 @@ from typing import Optional
 @dataclass
 class RadioState:
     """
-    Состояние текущего эфира.
+    Current radio state.
     """
 
     station: str = ""
@@ -20,3 +20,5 @@ class RadioState:
     running: bool = False
 
     mode: str = "random"
+
+    position: float = 0.0

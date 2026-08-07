@@ -11,9 +11,8 @@ from src.radio.state import RadioState
 
 class RadioStorage:
     """
-    Сохраняет состояние радио.
+    Stores radio state.
     """
-
 
     def __init__(
         self,
@@ -21,7 +20,6 @@ class RadioStorage:
     ):
 
         self.path = path
-
 
 
     def save(
@@ -34,6 +32,7 @@ class RadioStorage:
             "track": state.track,
             "running": state.running,
             "mode": state.mode,
+            "position": state.position,
         }
 
 
@@ -55,7 +54,6 @@ class RadioStorage:
             return RadioState()
 
 
-
         data = json.loads(
             self.path.read_text(
                 encoding="utf-8"
@@ -64,7 +62,6 @@ class RadioStorage:
 
 
         return RadioState(
-
             station=data.get(
                 "station",
                 "",
@@ -82,5 +79,10 @@ class RadioStorage:
             mode=data.get(
                 "mode",
                 "random",
+            ),
+
+            position=data.get(
+                "position",
+                0.0,
             ),
         )
