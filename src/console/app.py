@@ -114,6 +114,7 @@ class ConsoleApp:
                 )
 
 
+
     def change_mode(self):
 
         station = (
@@ -142,19 +143,11 @@ class ConsoleApp:
                 PlaylistMode.RANDOM
             )
 
-            print(
-                "Mode changed: Random"
-            )
-
 
         elif choice == "2":
 
             station.set_mode(
                 PlaylistMode.SEQUENTIAL
-            )
-
-            print(
-                "Mode changed: Sequential"
             )
 
 
@@ -164,16 +157,27 @@ class ConsoleApp:
                 PlaylistMode.ALBUM
             )
 
-            print(
-                "Mode changed: Album Flow"
-            )
-
 
         else:
 
             print(
                 "Invalid mode"
             )
+
+            return
+
+
+        self.session.state.mode = (
+            station.get_mode().value
+        )
+
+        self.session.save()
+
+
+        print(
+            f"Mode changed: {station.get_mode().name.title()}"
+        )
+
 
 
     def show_history(self):
@@ -183,6 +187,7 @@ class ConsoleApp:
         print()
 
         history = self.session.history.items()
+
 
         if not history:
 
@@ -243,6 +248,7 @@ class ConsoleApp:
             print(
                 "Invalid selection"
             )
+
 
 
     def change_station(self):
