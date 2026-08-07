@@ -65,7 +65,9 @@ class RadioSession:
         track = self.radio.next()
 
         if track:
-            self.state.track = str(track.path)
+            self.state.track = str(
+                track.path
+            )
 
             self.player.play(
                 track.path
@@ -75,12 +77,19 @@ class RadioSession:
 
         return track
 
+    def resume_playback(self):
+        """
+        Продолжает эфир после восстановления станции.
+        """
+
+        return self.play_next()
+
     def switch_station(
         self,
         station: Station
     ):
         """
-        Переключает эфир на другую станцию.
+        Переключает эфир.
         """
 
         self.player.stop()
