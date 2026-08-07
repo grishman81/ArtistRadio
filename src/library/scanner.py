@@ -5,7 +5,7 @@ Library Scanner
 
 from pathlib import Path
 
-from config import SUPPORTED_FORMATS
+from src.config import SUPPORTED_FORMATS
 from .metadata import MetadataReader
 from .models import Track
 

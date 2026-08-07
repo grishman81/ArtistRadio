@@ -3,10 +3,9 @@ ArtistRadio Engine
 Playlist Engine
 """
 
-from library.models import Track
-
-from playlist.history import PlaylistHistory
-from playlist.randomizer import PlaylistRandomizer
+from src.library.models import Track
+from src.playlist.history import PlaylistHistory
+from src.playlist.randomizer import PlaylistRandomizer
 
 
 class PlaylistEngine:

@@ -5,7 +5,7 @@ Playlist Randomizer
 
 import random
 
-from library.models import Track
+from src.library.models import Track
 from .history import PlaylistHistory
 
 
