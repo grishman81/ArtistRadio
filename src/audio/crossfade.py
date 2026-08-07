@@ -6,7 +6,7 @@ Crossfade Engine
 
 class CrossfadeEngine:
     """
-    Controls transition between tracks.
+    Controls track transitions.
     """
 
     def __init__(
@@ -16,10 +16,24 @@ class CrossfadeEngine:
 
         self.duration = duration
 
+        self.active = False
+
+
 
     def start(self):
 
+        self.active = True
+
         return True
+
+
+
+    def stop(self):
+
+        self.active = False
+
+        return True
+
 
 
     def fade_out_old(
@@ -27,9 +41,12 @@ class CrossfadeEngine:
         player,
     ):
 
+        self.start()
+
         player.fade_out(
             steps=self.duration
         )
+
 
 
     def fade_in_new(
@@ -40,3 +57,5 @@ class CrossfadeEngine:
         player.fade_in(
             steps=self.duration
         )
+
+        self.stop()
