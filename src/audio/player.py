@@ -4,31 +4,31 @@ Audio Player
 """
 
 import subprocess
-import time
-
 from pathlib import Path
 
 
 class AudioPlayer:
     """
-    Audio playback controller.
+    Управление воспроизведением через ffplay.
     """
 
     def __init__(self):
 
         self.current: Path | None = None
 
+        self.secondary: Path | None = None
+
         self.process = None
+
+        self.secondary_process = None
 
         self.playing = False
 
         self.paused = False
 
-        self.started_at: float | None = None
+        self.volume = 1.0
 
-        self.position: float = 0.0
-
-        self.volume: float = 1.0
+        self.position = 0.0
 
 
 
@@ -44,37 +44,16 @@ class AudioPlayer:
 
         self.position = position
 
-
-        command = [
-            "ffplay",
-            "-nodisp",
-            "-autoexit",
-            "-loglevel",
-            "quiet",
-        ]
-
-
-        if position > 0:
-
-            command.extend(
-                [
-                    "-ss",
-                    str(position),
-                ]
-            )
-
-
-        command.append(
-            str(path)
-        )
-
-
         self.process = subprocess.Popen(
-            command
+            [
+                "ffplay",
+                "-nodisp",
+                "-autoexit",
+                "-loglevel",
+                "quiet",
+                str(path),
+            ]
         )
-
-
-        self.started_at = time.time()
 
         self.playing = True
 
@@ -82,14 +61,40 @@ class AudioPlayer:
 
 
 
+    def play_secondary(
+        self,
+        path: Path,
+    ) -> None:
+
+        self.secondary = path
+
+        self.secondary_process = subprocess.Popen(
+            [
+                "ffplay",
+                "-nodisp",
+                "-autoexit",
+                "-loglevel",
+                "quiet",
+                str(path),
+            ]
+        )
+
+
+
+    def stop_secondary(self) -> None:
+
+        if self.secondary_process:
+
+            self.secondary_process.terminate()
+
+            self.secondary_process = None
+
+
+        self.secondary = None
+
+
+
     def stop(self) -> None:
-
-        if self.playing:
-
-            self.position = (
-                self.current_position()
-            )
-
 
         if self.process:
 
@@ -98,21 +103,18 @@ class AudioPlayer:
             self.process = None
 
 
+        self.stop_secondary()
+
+
         self.playing = False
 
         self.paused = False
-
-        self.started_at = None
 
 
 
     def pause(self) -> None:
 
         if self.playing:
-
-            self.position = (
-                self.current_position()
-            )
 
             self.paused = True
 
@@ -121,8 +123,6 @@ class AudioPlayer:
     def resume(self) -> None:
 
         if self.playing:
-
-            self.started_at = time.time()
 
             self.paused = False
 
@@ -139,28 +139,7 @@ class AudioPlayer:
 
     def current_position(self) -> float:
 
-        if not self.playing:
-
-            return self.position
-
-
-        if self.paused:
-
-            return self.position
-
-
-        if self.started_at is None:
-
-            return self.position
-
-
-        return (
-            self.position
-            +
-            time.time()
-            -
-            self.started_at
-        )
+        return self.position
 
 
 
@@ -178,6 +157,7 @@ class AudioPlayer:
         )
 
 
+
     def apply_volume(
         self,
         volume: float,
@@ -188,26 +168,28 @@ class AudioPlayer:
         )
 
 
+
     def fade_out(
         self,
         steps: int = 10,
     ) -> None:
 
-        if steps <= 0:
-
-            self.volume = 0.0
-
-            return
-
-
         step = (
-            self.volume / steps
+            self.volume
+            /
+            max(
+                steps,
+                1,
+            )
         )
 
 
         for _ in range(steps):
 
-            self.volume -= step
+            self.volume = max(
+                0.0,
+                self.volume - step,
+            )
 
 
         self.volume = 0.0
@@ -219,37 +201,36 @@ class AudioPlayer:
         steps: int = 10,
     ) -> None:
 
-        if steps <= 0:
-
-            self.volume = 1.0
-
-            return
-
-
         step = (
-            (1.0 - self.volume)
+            1.0
             /
-            steps
+            max(
+                steps,
+                1,
+            )
         )
 
 
         for _ in range(steps):
 
-            self.volume += step
-
-
-        self.volume = 1.0
+            self.volume = min(
+                1.0,
+                self.volume + step,
+            )
 
 
 
     def is_finished(self) -> bool:
 
-        if self.process is None:
+        if not self.process:
 
             return False
 
 
-        return self.process.poll() is not None
+        return (
+            self.process.poll()
+            is not None
+        )
 
 
 
