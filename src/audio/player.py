@@ -163,6 +163,17 @@ class AudioPlayer:
 
 
 
+    def is_finished(self) -> bool:
+
+        if self.process is None:
+
+            return False
+
+
+        return self.process.poll() is not None
+
+
+
     def is_playing(self) -> bool:
 
         return self.playing
