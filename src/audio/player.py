@@ -178,6 +178,15 @@ class AudioPlayer:
         )
 
 
+    def apply_volume(
+        self,
+        volume: float,
+    ) -> None:
+
+        self.set_volume(
+            volume
+        )
+
 
     def fade_out(
         self,
