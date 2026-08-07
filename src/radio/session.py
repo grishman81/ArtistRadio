@@ -11,6 +11,8 @@ from src.radio.storage import RadioStorage
 
 from src.audio.player import AudioPlayer
 
+from src.station.station import Station
+
 from src.library.models import Track
 
 
@@ -35,19 +37,19 @@ class RadioSession:
 
         self.save()
 
-    def save(self) -> None:
+    def save(self):
         self.storage.save(
             self.state
         )
 
-    def start(self) -> None:
+    def start(self):
         self.state.running = True
 
         self.radio.start()
 
         self.save()
 
-    def stop(self) -> None:
+    def stop(self):
         self.state.running = False
 
         self.player.stop()
@@ -65,11 +67,32 @@ class RadioSession:
         if track:
             self.state.track = str(track.path)
 
-            if track.path:
-                self.player.play(
-                    track.path
-                )
+            self.player.play(
+                track.path
+            )
 
             self.save()
 
         return track
+
+    def switch_station(
+        self,
+        station: Station
+    ):
+        """
+        Переключает эфир на другую станцию.
+        """
+
+        self.player.stop()
+
+        self.radio = RadioEngine(
+            station
+        )
+
+        self.state.station = (
+            station.name
+        )
+
+        self.state.track = None
+
+        self.save()
