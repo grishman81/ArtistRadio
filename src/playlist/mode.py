@@ -11,3 +11,5 @@ class PlaylistMode(Enum):
     RANDOM = "random"
 
     SEQUENTIAL = "sequential"
+
+    ALBUM = "album"
