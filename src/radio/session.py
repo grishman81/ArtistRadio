@@ -62,6 +62,10 @@ class RadioSession:
 
     def stop(self):
 
+        self.state.position = (
+            self.player.current_position()
+        )
+
         self.state.running = False
 
         self.player.stop()
@@ -87,6 +91,8 @@ class RadioSession:
             self.state.track = str(
                 track.path
             )
+
+            self.state.position = 0.0
 
             self.player.play(
                 track.path
@@ -130,12 +136,14 @@ class RadioSession:
         )
 
 
-        self.player.play(
+        self.state.track = str(
             track.path
         )
 
+        self.state.position = 0.0
 
-        self.state.track = str(
+
+        self.player.play(
             track.path
         )
 
@@ -164,7 +172,8 @@ class RadioSession:
             if str(track.path) == self.state.track:
 
                 self.player.play(
-                    track.path
+                    track.path,
+                    self.state.position,
                 )
 
                 self.history.add(
@@ -203,6 +212,8 @@ class RadioSession:
 
 
         self.state.track = None
+
+        self.state.position = 0.0
 
 
         self.save()
