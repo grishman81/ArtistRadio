@@ -48,7 +48,7 @@ class PlaylistEngine:
             return tracks
 
 
-        recent = set(
+        recent_paths = set(
             self.history.items()
         )
 
@@ -56,7 +56,7 @@ class PlaylistEngine:
         filtered = [
             track
             for track in tracks
-            if track.path not in recent
+            if str(track.path) not in recent_paths
         ]
 
 
@@ -66,6 +66,63 @@ class PlaylistEngine:
 
 
         return filtered
+
+
+
+    def filter_diversity_tracks(
+        self,
+        tracks: list[Track],
+    ) -> list[Track]:
+
+
+        if not tracks:
+
+            return []
+
+
+        if not hasattr(
+            self.history,
+            "details",
+        ):
+
+            return tracks
+
+
+
+        recent = self.history.details()
+
+
+        recent_artists = {
+            item["artist"]
+            for item in recent
+            if item.get("artist")
+        }
+
+
+        recent_albums = {
+            item["album"]
+            for item in recent
+            if item.get("album")
+        }
+
+
+
+        filtered = [
+            track
+            for track in tracks
+            if track.artist not in recent_artists
+            and track.album not in recent_albums
+        ]
+
+
+
+        if filtered:
+
+            return filtered
+
+
+
+        return tracks
 
 
 
@@ -109,6 +166,7 @@ class PlaylistEngine:
                     if track.album == current_album
                 ]
 
+
                 self.album_name = current_album
 
                 self.position = 0
@@ -131,6 +189,12 @@ class PlaylistEngine:
             )
 
 
+            available_tracks = self.filter_diversity_tracks(
+                available_tracks
+            )
+
+
+
             track = self.randomizer.choose(
                 available_tracks
             )
@@ -144,7 +208,7 @@ class PlaylistEngine:
 
 
         self.history.add(
-            track.path
+            track
         )
 
 
