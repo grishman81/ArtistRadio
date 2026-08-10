@@ -38,17 +38,13 @@ class RadioSession:
 
         self.crossfade = CrossfadeEngine()
 
-
         self.crossfade_duration = (
             self.crossfade.duration
         )
 
-
         self.crossfade_running = False
 
-
         self.next_track = None
-
 
 
         self.state = RadioState(
@@ -85,7 +81,6 @@ class RadioSession:
             self.player.current_position()
         )
 
-
         self.state.running = False
 
 
@@ -93,6 +88,8 @@ class RadioSession:
 
         self.radio.stop()
 
+
+        self.crossfade.stop()
 
         self.crossfade_running = False
 
@@ -128,13 +125,27 @@ class RadioSession:
         self,
         track,
     ):
+        """
+        Подготавливает следующий трек
+        для вторичного канала.
+        """
 
-        """
-        Сохраняет следующий трек
-        для будущего перехода.
-        """
 
         self.next_track = track
+
+
+        if (
+            track is not None
+            and hasattr(
+                self,
+                "player",
+            )
+        ):
+
+            self.player.play_secondary(
+                track.path
+            )
+
 
         return self.next_track
 
@@ -177,9 +188,8 @@ class RadioSession:
             return None
 
 
-
-        self.player.play_secondary(
-            track.path
+        self.prepare_next_track(
+            track
         )
 
 
@@ -202,28 +212,14 @@ class RadioSession:
             return None
 
 
-
         track = self.radio.next()
-
 
 
         if track:
 
-
             self.player.play(
                 track.path
             )
-
-
-            self.player.play_secondary(
-                track.path
-            )
-
-
-            self.crossfade.start()
-
-            self.crossfade_running = True
-
 
 
             self.state.track = str(
@@ -232,7 +228,6 @@ class RadioSession:
 
 
             self.state.position = 0.0
-
 
 
             self.history.add(
@@ -264,7 +259,6 @@ class RadioSession:
             return None
 
 
-
         track = Track(
             artist=item["artist"],
             album=item["album"],
@@ -282,7 +276,6 @@ class RadioSession:
 
 
         self.state.position = 0.0
-
 
 
         self.player.play(
@@ -304,18 +297,14 @@ class RadioSession:
             return self.play_next()
 
 
-
         tracks = self.radio.station.library.get_tracks(
             self.radio.station.artist
         )
 
 
-
         for track in tracks:
 
-
             if str(track.path) == self.state.track:
-
 
                 self.player.play(
                     track.path,
@@ -356,30 +345,18 @@ class RadioSession:
             )
 
 
-            levels = self.crossfade.update()
-
-
-            self.player.apply_primary_volume(
-                levels["old"]
-            )
-
-
-            self.player.apply_secondary_volume(
-                levels["new"]
+            levels = self.apply_crossfade(
+                self.crossfade.elapsed_time
             )
 
 
             if self.crossfade.is_complete():
 
-
                 self.player.stop_secondary()
-
 
                 self.crossfade.stop()
 
-
                 self.crossfade_running = False
-
 
 
             return levels
@@ -425,9 +402,9 @@ class RadioSession:
         self.state.position = 0.0
 
 
-        self.crossfade_running = False
-
         self.next_track = None
+
+        self.crossfade_running = False
 
 
         self.save()
