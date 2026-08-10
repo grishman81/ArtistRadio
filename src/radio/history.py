@@ -8,23 +8,31 @@ import json
 from pathlib import Path
 
 
+
 class PlaybackHistory:
+
 
     def __init__(
         self,
         path: Path,
         limit: int = 100,
     ):
+
         self.path = path
+
         self.limit = limit
+
         self._items: list[dict] = []
 
         self.load()
+
+
 
     def add(
         self,
         track,
     ) -> None:
+
 
         item = {
             "artist": track.artist,
@@ -34,39 +42,106 @@ class PlaybackHistory:
             "path": str(track.path),
         }
 
+
         self._items.append(
             item
         )
 
+
         if len(self._items) > self.limit:
+
             self._items.pop(0)
+
 
         self.save()
 
-    def items(self) -> list[dict]:
+
+
+    def items(
+        self,
+    ) -> list[dict]:
+
         return list(
-            reversed(self._items)
+            reversed(
+                self._items
+            )
         )
+
+
 
     def get(
         self,
         index: int,
     ):
+
+
         items = self.items()
 
+
         if index < 0:
+
             return None
 
+
         if index >= len(items):
+
             return None
+
 
         return items[index]
 
-    def clear(self) -> None:
+
+
+    def recent_paths(
+        self,
+        count: int = 10,
+    ) -> list[str]:
+
+
+        recent = self.items()
+
+
+        return [
+            item["path"]
+            for item in recent[:count]
+        ]
+
+
+
+    def contains(
+        self,
+        track,
+    ) -> bool:
+
+
+        if track is None:
+
+            return False
+
+
+        path = str(
+            track.path
+        )
+
+
+        return path in self.recent_paths()
+
+
+
+    def clear(
+        self,
+    ) -> None:
+
         self._items.clear()
+
         self.save()
 
-    def save(self) -> None:
+
+
+    def save(
+        self,
+    ) -> None:
+
 
         self.path.write_text(
             json.dumps(
@@ -77,10 +152,17 @@ class PlaybackHistory:
             encoding="utf-8",
         )
 
-    def load(self) -> None:
+
+
+    def load(
+        self,
+    ) -> None:
+
 
         if not self.path.exists():
+
             return
+
 
         self._items = json.loads(
             self.path.read_text(
