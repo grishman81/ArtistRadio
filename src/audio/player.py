@@ -12,21 +12,33 @@ class AudioPlayer:
     Управление воспроизведением через ffplay.
     """
 
+
     def __init__(self):
 
         self.current: Path | None = None
 
         self.secondary: Path | None = None
 
+
         self.process = None
 
         self.secondary_process = None
+
 
         self.playing = False
 
         self.paused = False
 
+
+        # общий уровень (старый API)
         self.volume = 1.0
+
+
+        # уровни для crossfade
+        self.primary_volume = 1.0
+
+        self.secondary_volume = 0.0
+
 
         self.position = 0.0
 
@@ -38,11 +50,14 @@ class AudioPlayer:
         position: float = 0.0,
     ) -> None:
 
+
         self.stop()
+
 
         self.current = path
 
         self.position = position
+
 
         self.process = subprocess.Popen(
             [
@@ -55,6 +70,7 @@ class AudioPlayer:
             ]
         )
 
+
         self.playing = True
 
         self.paused = False
@@ -66,7 +82,9 @@ class AudioPlayer:
         path: Path,
     ) -> None:
 
+
         self.secondary = path
+
 
         self.secondary_process = subprocess.Popen(
             [
@@ -83,6 +101,7 @@ class AudioPlayer:
 
     def stop_secondary(self) -> None:
 
+
         if self.secondary_process:
 
             self.secondary_process.terminate()
@@ -92,9 +111,12 @@ class AudioPlayer:
 
         self.secondary = None
 
+        self.secondary_volume = 0.0
+
 
 
     def stop(self) -> None:
+
 
         if self.process:
 
@@ -111,8 +133,12 @@ class AudioPlayer:
         self.paused = False
 
 
+        self.primary_volume = 1.0
+
+
 
     def pause(self) -> None:
+
 
         if self.playing:
 
@@ -121,6 +147,7 @@ class AudioPlayer:
 
 
     def resume(self) -> None:
+
 
         if self.playing:
 
@@ -148,6 +175,7 @@ class AudioPlayer:
         volume: float,
     ) -> None:
 
+
         self.volume = max(
             0.0,
             min(
@@ -163,8 +191,41 @@ class AudioPlayer:
         volume: float,
     ) -> None:
 
+
         self.set_volume(
             volume
+        )
+
+
+
+    def apply_primary_volume(
+        self,
+        volume: float,
+    ) -> None:
+
+
+        self.primary_volume = max(
+            0.0,
+            min(
+                1.0,
+                volume,
+            )
+        )
+
+
+
+    def apply_secondary_volume(
+        self,
+        volume: float,
+    ) -> None:
+
+
+        self.secondary_volume = max(
+            0.0,
+            min(
+                1.0,
+                volume,
+            )
         )
 
 
@@ -173,6 +234,7 @@ class AudioPlayer:
         self,
         steps: int = 10,
     ) -> None:
+
 
         step = (
             self.volume
@@ -201,6 +263,7 @@ class AudioPlayer:
         steps: int = 10,
     ) -> None:
 
+
         step = (
             1.0
             /
@@ -221,6 +284,7 @@ class AudioPlayer:
 
 
     def is_finished(self) -> bool:
+
 
         if not self.process:
 

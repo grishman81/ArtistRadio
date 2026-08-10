@@ -15,8 +15,8 @@ from src.audio.player import AudioPlayer
 from src.audio.crossfade import CrossfadeEngine
 
 from src.station.station import Station
-
 from src.library.models import Track
+
 
 
 class RadioSession:
@@ -36,6 +36,8 @@ class RadioSession:
         self.history = history
 
         self.crossfade = CrossfadeEngine()
+
+        self.crossfade_running = False
 
 
         self.state = RadioState(
@@ -78,6 +80,8 @@ class RadioSession:
 
         self.radio.stop()
 
+        self.crossfade_running = False
+
         self.save()
 
 
@@ -92,7 +96,11 @@ class RadioSession:
         )
 
 
-        self.player.apply_volume(
+        self.player.apply_primary_volume(
+            levels["old"]
+        )
+
+        self.player.apply_secondary_volume(
             levels["new"]
         )
 
@@ -119,43 +127,12 @@ class RadioSession:
 
         self.crossfade.start()
 
+        self.crossfade_running = True
 
-        levels = self.crossfade.update(
+
+        return self.apply_crossfade(
             elapsed
         )
-
-
-        self.player.apply_volume(
-            levels["new"]
-        )
-
-
-        if self.crossfade.is_complete():
-
-            self.player.stop()
-
-            self.player.play(
-                track.path
-            )
-
-            self.player.stop_secondary()
-
-
-            self.state.track = str(
-                track.path
-            )
-
-            self.state.position = 0.0
-
-
-            self.history.add(
-                track
-            )
-
-            self.save()
-
-
-        return levels
 
 
 
@@ -166,41 +143,34 @@ class RadioSession:
             return None
 
 
-        if self.player.is_playing():
-
-            self.crossfade.fade_out_old(
-                self.player
-            )
-
-
         track = self.radio.next()
 
 
         if track:
 
-            self.state.track = str(
+
+            # основной трек
+            self.player.play(
                 track.path
             )
 
-            self.state.position = 0.0
 
-
-            self.player.play(
+            # следующий поток для crossfade
+            self.player.play_secondary(
                 track.path
             )
 
 
             self.crossfade.start()
 
+            self.crossfade_running = True
 
-            self.apply_crossfade(
-                0
+
+            self.state.track = str(
+                track.path
             )
 
-
-            self.crossfade.fade_in_new(
-                self.player
-            )
+            self.state.position = 0.0
 
 
             self.history.add(
@@ -293,11 +263,48 @@ class RadioSession:
 
 
 
-    def check_playback(self):
+    def check_playback(
+        self,
+        delta: float = 1.0,
+    ):
 
         if not self.state.running:
 
             return None
+
+
+        if self.crossfade_running:
+
+
+            self.crossfade.tick(
+                delta
+            )
+
+
+            levels = self.crossfade.update()
+
+
+            self.player.apply_primary_volume(
+                levels["old"]
+            )
+
+
+            self.player.apply_secondary_volume(
+                levels["new"]
+            )
+
+
+            if self.crossfade.is_complete():
+
+                self.player.stop_secondary()
+
+                self.crossfade.stop()
+
+                self.crossfade_running = False
+
+
+            return levels
+
 
 
         if self.player.is_finished():
@@ -336,6 +343,8 @@ class RadioSession:
         self.state.track = None
 
         self.state.position = 0.0
+
+        self.crossfade_running = False
 
 
         self.save()
