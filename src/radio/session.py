@@ -47,6 +47,9 @@ class RadioSession:
         self.crossfade_running = False
 
 
+        self.next_track = None
+
+
 
         self.state = RadioState(
             station=radio.station.name,
@@ -93,6 +96,8 @@ class RadioSession:
 
         self.crossfade_running = False
 
+        self.next_track = None
+
 
         self.save()
 
@@ -103,17 +108,6 @@ class RadioSession:
         position: float,
         duration: float,
     ) -> bool:
-        """
-        Проверяет момент начала перехода.
-
-        Например:
-
-        трек 240 секунд
-        crossfade 10 секунд
-
-        старт перехода:
-        230 секунда
-        """
 
 
         trigger = (
@@ -130,10 +124,27 @@ class RadioSession:
 
 
 
+    def prepare_next_track(
+        self,
+        track,
+    ):
+
+        """
+        Сохраняет следующий трек
+        для будущего перехода.
+        """
+
+        self.next_track = track
+
+        return self.next_track
+
+
+
     def apply_crossfade(
         self,
         elapsed: float,
     ):
+
 
         levels = self.crossfade.update(
             elapsed
@@ -160,9 +171,11 @@ class RadioSession:
         elapsed: float = 0.0,
     ):
 
+
         if track is None:
 
             return None
+
 
 
         self.player.play_secondary(
@@ -171,7 +184,6 @@ class RadioSession:
 
 
         self.crossfade.start()
-
 
         self.crossfade_running = True
 
@@ -183,6 +195,7 @@ class RadioSession:
 
 
     def play_next(self) -> Optional[Track]:
+
 
         if not self.state.running:
 
@@ -208,7 +221,6 @@ class RadioSession:
 
 
             self.crossfade.start()
-
 
             self.crossfade_running = True
 
@@ -264,7 +276,6 @@ class RadioSession:
         )
 
 
-
         self.state.track = str(
             track.path
         )
@@ -280,7 +291,6 @@ class RadioSession:
 
 
         self.save()
-
 
 
         return track
@@ -349,7 +359,6 @@ class RadioSession:
             levels = self.crossfade.update()
 
 
-
             self.player.apply_primary_volume(
                 levels["old"]
             )
@@ -358,7 +367,6 @@ class RadioSession:
             self.player.apply_secondary_volume(
                 levels["new"]
             )
-
 
 
             if self.crossfade.is_complete():
@@ -418,6 +426,8 @@ class RadioSession:
 
 
         self.crossfade_running = False
+
+        self.next_track = None
 
 
         self.save()
