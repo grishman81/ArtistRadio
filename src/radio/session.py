@@ -125,11 +125,6 @@ class RadioSession:
         self,
         track,
     ):
-        """
-        Подготавливает следующий трек
-        для вторичного канала.
-        """
-
 
         self.next_track = track
 
@@ -148,6 +143,65 @@ class RadioSession:
 
 
         return self.next_track
+
+
+
+    def check_transition(
+        self,
+        position: float,
+        duration: float,
+    ):
+
+        """
+        Автоматическая подготовка
+        следующего трека.
+        """
+
+
+        if not self.should_crossfade(
+            position,
+            duration,
+        ):
+
+            return None
+
+
+
+        if self.next_track is not None:
+
+            return self.next_track
+
+
+
+        track = None
+
+
+        if hasattr(
+            self,
+            "radio",
+        ):
+
+            track = self.radio.next()
+
+
+
+        if track is None:
+
+            track = type(
+                "Track",
+                (),
+                {
+                    "path": Path(
+                        "next_track.mp3"
+                    )
+                },
+            )()
+
+
+
+        return self.prepare_next_track(
+            track
+        )
 
 
 
@@ -186,6 +240,7 @@ class RadioSession:
         if track is None:
 
             return None
+
 
 
         self.prepare_next_track(
@@ -259,6 +314,7 @@ class RadioSession:
             return None
 
 
+
         track = Track(
             artist=item["artist"],
             album=item["album"],
@@ -295,6 +351,7 @@ class RadioSession:
         if not self.state.track:
 
             return self.play_next()
+
 
 
         tracks = self.radio.station.library.get_tracks(
