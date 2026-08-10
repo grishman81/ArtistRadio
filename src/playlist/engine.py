@@ -21,12 +21,51 @@ class PlaylistEngine:
     ):
 
         self.randomizer = randomizer
+
         self.history = history
+
         self.mode = mode
 
         self.position = 0
+
         self.album_tracks = []
+
         self.album_name = None
+
+
+
+    def filter_recent_tracks(
+        self,
+        tracks: list[Track],
+    ) -> list[Track]:
+
+
+        if not hasattr(
+            self.history,
+            "items",
+        ):
+
+            return tracks
+
+
+        recent = set(
+            self.history.items()
+        )
+
+
+        filtered = [
+            track
+            for track in tracks
+            if track.path not in recent
+        ]
+
+
+        if not filtered:
+
+            return tracks
+
+
+        return filtered
 
 
 
@@ -71,6 +110,7 @@ class PlaylistEngine:
                 ]
 
                 self.album_name = current_album
+
                 self.position = 0
 
 
@@ -86,8 +126,13 @@ class PlaylistEngine:
         else:
 
 
-            track = self.randomizer.choose(
+            available_tracks = self.filter_recent_tracks(
                 tracks
+            )
+
+
+            track = self.randomizer.choose(
+                available_tracks
             )
 
 
