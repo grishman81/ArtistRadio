@@ -13,14 +13,15 @@ class RadioScheduler:
     def __init__(
         self,
         radio=None,
+        history=None,
         queue_limit: int = 3,
     ):
 
         self.radio = radio
 
-        self.queue = deque()
+        self.history = history
 
-        self.history = []
+        self.queue = deque()
 
         self.queue_limit = queue_limit
 
@@ -36,12 +37,39 @@ class RadioScheduler:
             return None
 
 
+        if self.was_played_recently(
+            track
+        ):
+
+            return None
+
+
         self.queue.append(
             track
         )
 
 
         return track
+
+
+
+    def was_played_recently(
+        self,
+        track,
+    ) -> bool:
+
+
+        if (
+            self.history is None
+            or track is None
+        ):
+
+            return False
+
+
+        return self.history.contains(
+            track
+        )
 
 
 
@@ -65,7 +93,19 @@ class RadioScheduler:
         added = 0
 
 
+        attempts = 0
+
+
         while len(self.queue) < target:
+
+
+            attempts += 1
+
+
+            if attempts > target * 5:
+
+                break
+
 
             track = self.radio.next()
 
@@ -73,6 +113,13 @@ class RadioScheduler:
             if track is None:
 
                 break
+
+
+            if self.was_played_recently(
+                track
+            ):
+
+                continue
 
 
             self.queue.append(
@@ -108,13 +155,7 @@ class RadioScheduler:
 
         if self.queue:
 
-            track = self.queue.popleft()
-
-            self.history.append(
-                track
-            )
-
-            return track
+            return self.queue.popleft()
 
 
 
@@ -125,13 +166,7 @@ class RadioScheduler:
 
             if track is not None:
 
-                self.history.append(
-                    track
-                )
-
-
-            return track
-
+                return track
 
 
         return None
@@ -141,6 +176,7 @@ class RadioScheduler:
     def peek(
         self,
     ):
+
 
         if not self.queue:
 
