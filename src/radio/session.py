@@ -236,11 +236,9 @@ class RadioSession:
         elapsed: float = 0.0,
     ):
 
-
         if track is None:
 
             return None
-
 
 
         self.prepare_next_track(
@@ -253,9 +251,68 @@ class RadioSession:
         self.crossfade_running = True
 
 
-        return self.apply_crossfade(
-            elapsed
-        )
+        if (
+            hasattr(
+                self.crossfade,
+                "is_complete",
+            )
+            and self.crossfade.is_complete()
+        ):
+
+            self.player.stop_secondary()
+
+
+            self.player.play(
+                track.path
+            )
+
+
+            self.state.track = str(
+                track.path
+            )
+
+
+            self.state.position = 0.0
+
+
+            if hasattr(
+                self,
+                "history",
+            ):
+
+                self.history.add(
+                    track
+                )
+
+
+            self.next_track = None
+
+
+            if hasattr(
+                self.crossfade,
+                "stop",
+            ):
+
+                self.crossfade.stop()
+
+            self.crossfade_running = False
+
+
+            return track
+
+
+
+        if hasattr(
+            self.crossfade,
+            "update",
+        ):
+
+            return self.apply_crossfade(
+                elapsed
+            )
+
+
+        return track
 
 
 
