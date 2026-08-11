@@ -5,7 +5,7 @@ CLI Entry Point
 
 from pathlib import Path
 import sys
-
+import time
 from src.library.library import Library
 
 from src.playlist.history import PlaylistHistory
@@ -22,6 +22,17 @@ from src.radio.history import PlaybackHistory
 from src.audio.player import AudioPlayer
 
 from src.cli.app import RadioCLI
+
+
+def format_time(seconds: float) -> str:
+
+    seconds = int(seconds)
+
+    minutes = seconds // 60
+
+    seconds = seconds % 60
+
+    return f"{minutes:02d}:{seconds:02d}"
 
 
 def create_session():
@@ -175,44 +186,59 @@ def main():
 
                 track = cli.session.current_track
 
-                if track and track != last_track:
+                if track:
 
-                    last_track = track
+                    print("\033[H\033[J", end="")
+                    
+                    if track != last_track:
 
-                    print()
+                        last_track = track
 
-                    print("📻 ArtistRadio Live")
-                    print("--------------------")
-                    print()
+                        print()
 
-                    print("▶ Now:")
+                        print("📻 ArtistRadio Live")
+                        print("--------------------")
+                        print()
+
+                        print("▶ Now:")
+                        print(f"   {track.artist} - {track.title}")
+
+                        print()
+
+                        print("💿 Album:")
+                        print(f"   {track.album}")
+
+                        print()
+
+                        print("📅 Year:")
+                        print(f"   {track.year}")
+
+                        print()
+
+                    position = cli.session.player.current_position()
+
+                    print("⏱ Progress:")
+
                     print(
-                        f"   {track.artist} - {track.title}"
+                        f"   {format_time(position)} / "
+                        f"{format_time(track.duration)}"
                     )
 
-                    print()
+                    bar_size = 20
 
-                    print("💿 Album:")
-                    print(
-                        f"   {track.album}"
-                    )
+                    filled = int(bar_size * position / max(track.duration, 1))
 
-                    print()
+                    bar = "█" * filled + "░" * (bar_size - filled)
 
-                    print("📅 Year:")
-                    print(
-                        f"   {track.year}"
-                    )
+                    print(f"   {bar}")
 
                     print()
 
-                    print(
-                        f"⏭ Queue: {len(state.queue)} tracks"
-                    )
+                    print(f"⏭ Queue: {len(state.queue)} tracks")
 
                 import time
 
-                time.sleep(5)
+                time.sleep(1)
 
         except KeyboardInterrupt:
 
