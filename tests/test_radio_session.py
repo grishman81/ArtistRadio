@@ -114,3 +114,28 @@ def test_radio_session_resume_playback():
     assert session2.state.position == saved_position
 
     session2.stop()
+
+
+def test_radio_session_queue_resume():
+
+    session = create_session()
+
+    session.start()
+
+    scheduler = session.radio.scheduler
+
+    scheduler.ensure_queue()
+
+    saved_queue = scheduler.export_queue()
+
+    session.state.queue = saved_queue
+
+    session.save()
+
+    session.stop()
+
+    session2 = create_session()
+
+    restored_scheduler = session2.radio.scheduler
+
+    assert len(restored_scheduler.queue) == len(saved_queue)

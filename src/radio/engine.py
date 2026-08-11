@@ -2,7 +2,7 @@
 ArtistRadio Engine
 Radio Engine
 """
-
+from src.radio.scheduler import RadioScheduler
 from src.station.station import Station
 
 
@@ -12,7 +12,13 @@ class RadioEngine:
     """
 
     def __init__(self, station: Station):
+
         self.station = station
+
+        self.scheduler = RadioScheduler(
+            radio=self
+        )
+
         self.running = False
 
     def start(self):
