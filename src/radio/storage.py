@@ -14,6 +14,7 @@ class RadioStorage:
     Stores radio state.
     """
 
+
     def __init__(
         self,
         path: Path,
@@ -22,10 +23,12 @@ class RadioStorage:
         self.path = path
 
 
+
     def save(
         self,
         state: RadioState,
     ) -> None:
+
 
         data = {
             "station": state.station,
@@ -33,6 +36,7 @@ class RadioStorage:
             "running": state.running,
             "mode": state.mode,
             "position": state.position,
+            "queue": state.queue,
         }
 
 
@@ -47,11 +51,15 @@ class RadioStorage:
 
 
 
-    def load(self) -> RadioState:
+    def load(
+        self,
+    ) -> RadioState:
+
 
         if not self.path.exists():
 
             return RadioState()
+
 
 
         data = json.loads(
@@ -62,13 +70,14 @@ class RadioStorage:
 
 
         return RadioState(
+
             station=data.get(
                 "station",
                 "",
             ),
 
             track=data.get(
-                "track"
+                "track",
             ),
 
             running=data.get(
@@ -84,5 +93,10 @@ class RadioStorage:
             position=data.get(
                 "position",
                 0.0,
+            ),
+
+            queue=data.get(
+                "queue",
+                [],
             ),
         )
