@@ -1,11 +1,13 @@
 """
 ArtistRadio Engine
+
 Radio Session
 """
 
 from pathlib import Path
 from typing import Optional
 
+from src.radio import scheduler
 from src.radio.engine import RadioEngine
 from src.radio.state import RadioState
 from src.radio.storage import RadioStorage
@@ -35,28 +37,83 @@ class RadioSession:
 
         self.crossfade = CrossfadeEngine()
 
-        self.crossfade_duration = (
-            self.crossfade.duration
-        )
+        self.crossfade_duration = self.crossfade.duration
 
         self.crossfade_running = False
 
         self.next_track = None
 
-        self.state = RadioState(
-            station=radio.station.name,
-            mode=radio.station.get_mode().value,
-        )
+        self.state = self.storage.load()
+
+        if not self.state.station:
+            self.state.station = radio.station.name
+
+        if not self.state.mode:
+            self.state.mode = radio.station.get_mode().value
+
+        self.restore_queue()
 
         self.save()
 
-
     def save(self):
 
-        self.storage.save(
-            self.state
+        self.storage.save(self.state)
+
+    def restore_queue(self):
+
+        scheduler = getattr(
+            self.radio,
+            "scheduler",
+            None,
         )
 
+        if scheduler is None:
+
+            return
+
+        if not hasattr(
+            scheduler,
+            "restore_queue",
+        ):
+
+            return
+
+        if not self.state.queue:
+
+            return
+
+        tracks = self.radio.station.library.get_tracks(self.radio.station.artist)
+
+        restored = []
+
+        for track in tracks:
+
+            if str(track.path) in self.state.queue:
+
+                restored.append(track)
+
+        scheduler.restore_queue(restored)
+
+    def save_queue(self):
+
+        scheduler = getattr(
+            self.radio,
+            "scheduler",
+            None,
+        )
+
+        if scheduler is None:
+
+            return
+
+        if not hasattr(
+            scheduler,
+            "export_queue",
+        ):
+
+            return
+
+        self.state.queue = scheduler.export_queue()
 
     def start(self):
 
@@ -66,12 +123,9 @@ class RadioSession:
 
         self.save()
 
-
     def stop(self):
 
-        self.state.position = (
-            self.player.current_position()
-        )
+        self.state.position = self.player.current_position()
 
         self.state.running = False
 
@@ -85,8 +139,9 @@ class RadioSession:
 
         self.next_track = None
 
-        self.save()
+        self.save_queue()
 
+        self.save()
 
     def should_crossfade(
         self,
@@ -94,17 +149,12 @@ class RadioSession:
         duration: float,
     ) -> bool:
 
-        trigger = (
-            duration
-            -
-            self.crossfade_duration
-        )
+        trigger = duration - self.crossfade_duration
 
         return position >= max(
             0.0,
             trigger,
         )
-
 
     def prepare_next_track(
         self,
@@ -113,20 +163,14 @@ class RadioSession:
 
         self.next_track = track
 
-        if (
-            track is not None
-            and hasattr(
-                self,
-                "player",
-            )
+        if track is not None and hasattr(
+            self,
+            "player",
         ):
 
-            self.player.play_secondary(
-                track.path
-            )
+            self.player.play_secondary(track.path)
 
         return self.next_track
-
 
     def check_transition(
         self,
@@ -141,11 +185,9 @@ class RadioSession:
 
             return None
 
-
         if self.next_track is not None:
 
             return self.next_track
-
 
         track = None
 
@@ -156,41 +198,26 @@ class RadioSession:
 
             track = self.radio.next()
 
-
         if track is None:
 
             track = type(
                 "Track",
                 (),
-                {
-                    "path": Path(
-                        "next_track.mp3"
-                    )
-                },
+                {"path": Path("next_track.mp3")},
             )()
 
-
-        return self.prepare_next_track(
-            track
-        )
-
+        return self.prepare_next_track(track)
 
     def apply_crossfade(
         self,
         elapsed: float,
     ):
 
-        levels = self.crossfade.update(
-            elapsed
-        )
+        levels = self.crossfade.update(elapsed)
 
-        self.player.apply_primary_volume(
-            levels["old"]
-        )
+        self.player.apply_primary_volume(levels["old"])
 
-        self.player.apply_secondary_volume(
-            levels["new"]
-        )
+        self.player.apply_secondary_volume(levels["new"])
 
         return levels
 
@@ -203,7 +230,6 @@ class RadioSession:
         if track is None:
 
             return None
-
 
         if not hasattr(
             self,
@@ -219,14 +245,12 @@ class RadioSession:
                 },
             )()
 
-
         if not hasattr(
             self,
             "crossfade",
         ):
 
             self.crossfade = CrossfadeEngine()
-
 
         if not hasattr(
             self,
@@ -235,29 +259,19 @@ class RadioSession:
 
             self.crossfade_running = False
 
-
-        self.prepare_next_track(
-            track
-        )
-
+        self.prepare_next_track(track)
 
         self.crossfade.start()
 
         self.crossfade_running = True
 
-
-        can_crossfade = (
-            hasattr(
-                self.player,
-                "apply_primary_volume",
-            )
-            and
-            hasattr(
-                self.player,
-                "apply_secondary_volume",
-            )
+        can_crossfade = hasattr(
+            self.player,
+            "apply_primary_volume",
+        ) and hasattr(
+            self.player,
+            "apply_secondary_volume",
         )
-
 
         if not can_crossfade:
 
@@ -268,37 +282,24 @@ class RadioSession:
 
                 self.player.stop_secondary()
 
+            self.player.play(track.path)
 
-            self.player.play(
-                track.path
-            )
-
-
-            self.state.track = str(
-                track.path
-            )
+            self.state.track = str(track.path)
 
             self.state.position = 0.0
-
 
             if hasattr(
                 self,
                 "history",
             ):
 
-                self.history.add(
-                    track
-                )
-
+                self.history.add(track)
 
             self.next_track = None
 
             self.crossfade_running = False
 
-
             return track
-
-
 
         if (
             hasattr(
@@ -315,31 +316,20 @@ class RadioSession:
 
                 self.player.stop_secondary()
 
+            self.player.play(track.path)
 
-            self.player.play(
-                track.path
-            )
-
-
-            self.state.track = str(
-                track.path
-            )
+            self.state.track = str(track.path)
 
             self.state.position = 0.0
-
 
             if hasattr(
                 self,
                 "history",
             ):
 
-                self.history.add(
-                    track
-                )
-
+                self.history.add(track)
 
             self.next_track = None
-
 
             if hasattr(
                 self.crossfade,
@@ -348,17 +338,11 @@ class RadioSession:
 
                 self.crossfade.stop()
 
-
             self.crossfade_running = False
-
 
             return track
 
-
-        return self.apply_crossfade(
-            elapsed
-        )
-
+        return self.apply_crossfade(elapsed)
 
     def play_next(
         self,
@@ -368,78 +352,50 @@ class RadioSession:
 
             return None
 
-
         track = self.radio.next()
-
 
         if track:
 
-            self.player.play(
-                track.path
-            )
+            self.player.play(track.path)
 
-
-            self.state.track = str(
-                track.path
-            )
+            self.state.track = str(track.path)
 
             self.state.position = 0.0
 
-
-            self.history.add(
-                track
-            )
-
+            self.history.add(track)
 
             self.save()
 
-
         return track
-
 
     def play_history_item(
         self,
         index: int,
     ) -> Optional[Track]:
 
-        item = self.history.get(
-            index
-        )
-
+        item = self.history.get(index)
 
         if item is None:
 
             return None
-
 
         track = Track(
             artist=item["artist"],
             album=item["album"],
             title=item["title"],
             year=item["year"],
-            path=Path(
-                item["path"]
-            ),
+            path=Path(item["path"]),
         )
 
-
-        self.state.track = str(
-            track.path
-        )
+        self.state.track = str(track.path)
 
         self.state.position = 0.0
 
-
-        self.player.play(
-            track.path
-        )
-
+        self.player.play(track.path)
 
         self.save()
 
-
         return track
-
 
     def resume_playback(
         self,
@@ -449,11 +405,7 @@ class RadioSession:
 
             return self.play_next()
 
-
-        tracks = self.radio.station.library.get_tracks(
-            self.radio.station.artist
-        )
-
+        tracks = self.radio.station.library.get_tracks(self.radio.station.artist)
 
         for track in tracks:
 
@@ -464,14 +416,9 @@ class RadioSession:
                     self.state.position,
                 )
 
-
-                self.history.add(
-                    track
-                )
-
+                self.history.add(track)
 
                 return track
-
 
         return self.play_next()
 
@@ -484,18 +431,11 @@ class RadioSession:
 
             return None
 
-
         if self.crossfade_running:
 
-            self.crossfade.tick(
-                delta
-            )
+            self.crossfade.tick(delta)
 
-
-            levels = self.apply_crossfade(
-                self.crossfade.elapsed_time
-            )
-
+            levels = self.apply_crossfade(self.crossfade.elapsed_time)
 
             if self.crossfade.is_complete():
 
@@ -506,7 +446,6 @@ class RadioSession:
 
                     self.player.stop_secondary()
 
-
                 if hasattr(
                     self.crossfade,
                     "stop",
@@ -514,23 +453,15 @@ class RadioSession:
 
                     self.crossfade.stop()
 
-
                 self.crossfade_running = False
 
-
             return levels
-
-
 
         if self.player.is_finished():
 
             return self.play_next()
 
-
-
         return None
-
-
 
     def switch_station(
         self,
@@ -539,30 +470,18 @@ class RadioSession:
 
         self.player.stop()
 
+        self.radio = RadioEngine(station)
 
-        self.radio = RadioEngine(
-            station
-        )
+        self.state.station = station.name
 
-
-        self.state.station = (
-            station.name
-        )
-
-
-        self.state.mode = (
-            station.get_mode().value
-        )
-
+        self.state.mode = station.get_mode().value
 
         self.state.track = None
 
         self.state.position = 0.0
 
-
         self.next_track = None
 
         self.crossfade_running = False
-
 
         self.save()
