@@ -519,3 +519,40 @@ class RadioSession:
         assert session.player.paused is False
 
         session.stop()
+
+    def skip(self) -> Optional[Track]:
+
+        if not self.state.running:
+
+            return None
+
+
+        track = self.radio.next()
+
+
+        if track is None:
+
+            return None
+
+
+        self.player.play(
+            track.path
+        )
+
+
+        self.state.track = str(
+            track.path
+        )
+
+        self.state.position = 0.0
+
+
+        self.history.add(
+            track
+        )
+
+
+        self.save()
+
+
+        return track
