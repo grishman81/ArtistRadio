@@ -485,3 +485,37 @@ class RadioSession:
         self.crossfade_running = False
 
         self.save()
+
+    def pause(self):
+
+        self.player.pause()
+
+        self.state.position = self.player.current_position()
+
+        self.save()
+
+    def resume(self):
+
+        self.player.resume()
+
+        self.state.running = True
+
+        self.save()
+
+    def test_radio_session_pause_resume():
+
+        session = create_session()
+
+        session.start()
+
+        session.play_next()
+
+        session.pause()
+
+        assert session.player.paused is True
+
+        session.resume()
+
+        assert session.player.paused is False
+
+        session.stop()
