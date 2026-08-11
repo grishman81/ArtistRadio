@@ -5,6 +5,7 @@ Radio Session
 """
 
 from pathlib import Path
+from turtle import position
 from typing import Optional
 
 from src.radio.engine import RadioEngine
@@ -45,6 +46,8 @@ class RadioSession:
         self.state = self.storage.load()
 
         self.current_track = None
+
+        self.restoring = False
 
         if not self.state.station:
             self.state.station = radio.station.name
@@ -125,8 +128,6 @@ class RadioSession:
         self.save()
 
     def stop(self):
-
-        self.state.position = self.player.current_position()
 
         self.state.running = False
 
@@ -407,16 +408,21 @@ class RadioSession:
         if not self.state.track:
 
             self.state.running = True
-
             self.radio.start()
 
             return self.play_next()
 
-        tracks = self.radio.station.library.get_tracks(self.radio.station.artist)
+        tracks = self.radio.station.library.get_tracks(
+            self.radio.station.artist
+        )
 
         for track in tracks:
 
             if str(track.path) == self.state.track:
+
+                position = self.state.position
+
+                print("BEFORE PLAY:", position)
 
                 self.state.running = True
 
@@ -426,8 +432,16 @@ class RadioSession:
 
                 self.player.play(
                     track.path,
-                    self.state.position,
+                    position,
                 )
+
+                print("AFTER PLAY:", self.state.position)
+
+                self.player.position = position
+
+                self.state.position = position
+
+                print("AFTER RESTORE:", self.state.position)
 
                 self.history.add(track)
 
@@ -435,16 +449,13 @@ class RadioSession:
 
                 return track
 
-        self.state.running = True
-
-        self.radio.start()
-
-        return self.play_next()
-
     def check_playback(
         self,
         delta: float = 1.0,
     ):
+
+        if self.restoring:
+            return None
 
         if not self.state.running:
 
@@ -525,14 +536,10 @@ class RadioSession:
 
     def skip(self) -> Optional[Track]:
 
-        print("SKIP START")
-
         if not self.state.running:
             return None
 
         track = self.radio.next()
-
-        print("RADIO NEXT:", track)
 
         if track is None:
             return None

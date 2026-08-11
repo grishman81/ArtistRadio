@@ -5,7 +5,7 @@ Audio Player
 
 import subprocess
 from pathlib import Path
-
+import time
 
 class AudioPlayer:
     """
@@ -14,6 +14,8 @@ class AudioPlayer:
 
 
     def __init__(self):
+
+        self.started_at = None
 
         self.current: Path | None = None
 
@@ -57,6 +59,8 @@ class AudioPlayer:
         self.current = path
 
         self.position = position
+
+        self.started_at = time.time() - position
 
 
         self.process = subprocess.Popen(
@@ -162,9 +166,20 @@ class AudioPlayer:
 
         self.position = position
 
+        if self.started_at is not None:
+
+            self.started_at = time.time() - position
+
 
 
     def current_position(self) -> float:
+
+        if self.playing and self.started_at is not None:
+
+            return max(
+                self.position,
+                time.time() - self.started_at,
+            )
 
         return self.position
 
