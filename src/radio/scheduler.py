@@ -15,6 +15,7 @@ class RadioScheduler:
         radio=None,
         history=None,
         queue_limit: int = 3,
+        refill_after_next: bool = True,
     ):
 
         self.radio = radio
@@ -24,6 +25,8 @@ class RadioScheduler:
         self.queue = deque()
 
         self.queue_limit = queue_limit
+
+        self.refill_after_next = refill_after_next
 
 
 
@@ -92,7 +95,6 @@ class RadioScheduler:
 
         added = 0
 
-
         attempts = 0
 
 
@@ -134,11 +136,24 @@ class RadioScheduler:
 
 
 
-    def ensure_queue(
+    def refill(
         self,
     ):
 
         return self.fill()
+
+
+
+    def ensure_queue(
+        self,
+    ):
+
+        if len(self.queue) < self.queue_limit:
+
+            return self.fill()
+
+
+        return 0
 
 
 
@@ -155,7 +170,15 @@ class RadioScheduler:
 
         if self.queue:
 
-            return self.queue.popleft()
+            track = self.queue.popleft()
+
+
+            if self.refill_after_next:
+
+                self.ensure_queue()
+
+
+            return track
 
 
 
@@ -167,6 +190,7 @@ class RadioScheduler:
             if track is not None:
 
                 return track
+
 
 
         return None
