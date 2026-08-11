@@ -23,15 +23,11 @@ from src.audio.player import AudioPlayer
 
 def create_session():
 
-    library = Library(
-        Path("database")
-    )
+    library = Library(Path("database"))
 
     playlist_history = PlaylistHistory()
 
-    randomizer = PlaylistRandomizer(
-        playlist_history
-    )
+    randomizer = PlaylistRandomizer(playlist_history)
 
     playlist = PlaylistEngine(
         randomizer,
@@ -45,17 +41,11 @@ def create_session():
         playlist=playlist,
     )
 
-    radio = RadioEngine(
-        station
-    )
+    radio = RadioEngine(station)
 
-    storage = RadioStorage(
-        Path("test_radio_state.json")
-    )
+    storage = RadioStorage(Path("test_radio_state.json"))
 
-    playback_history = PlaybackHistory(
-        Path("test_radio_history.json")
-    )
+    playback_history = PlaybackHistory(Path("test_radio_history.json"))
 
     player = AudioPlayer()
 
@@ -90,14 +80,37 @@ def test_radio_session_play_next():
 
     assert track is not None
 
-    assert (
-        session.state.track
-        == str(track.path)
-    )
+    assert session.state.track == str(track.path)
 
-    assert (
-        session.player.current
-        == track.path
-    )
+    assert session.player.current == track.path
 
     session.stop()
+
+
+def test_radio_session_resume_playback():
+
+    session = create_session()
+
+    session.start()
+
+    track = session.play_next()
+
+    assert track is not None
+
+    saved_track = session.state.track
+
+    saved_position = session.state.position
+
+    session.stop()
+
+    session2 = create_session()
+
+    resumed = session2.resume_playback()
+
+    assert resumed is not None
+
+    assert str(resumed.path) == saved_track
+
+    assert session2.state.position == saved_position
+
+    session2.stop()
