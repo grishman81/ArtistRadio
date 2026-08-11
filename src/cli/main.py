@@ -154,6 +154,10 @@ def main():
 
         cli.start()
 
+        if cli.session.state.track is None:
+
+            cli.next()
+
         print()
         print("📻 ArtistRadio is running")
         print("Press Ctrl+C to stop")
