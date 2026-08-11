@@ -44,6 +44,8 @@ class RadioSession:
 
         self.state = self.storage.load()
 
+        self.current_track = None
+
         if not self.state.station:
             self.state.station = radio.station.name
 
@@ -281,6 +283,8 @@ class RadioSession:
 
                 self.player.stop_secondary()
 
+            self.current_track = track
+
             self.player.play(track.path)
 
             self.state.track = str(track.path)
@@ -355,6 +359,8 @@ class RadioSession:
 
         if track:
 
+            self.current_track = track
+
             self.player.play(track.path)
 
             self.state.track = str(track.path)
@@ -415,6 +421,8 @@ class RadioSession:
                 self.state.running = True
 
                 self.radio.start()
+
+                self.current_track = track
 
                 self.player.play(
                     track.path,
@@ -528,6 +536,8 @@ class RadioSession:
 
         if track is None:
             return None
+
+        self.current_track = track
 
         self.player.play(track.path)
 
