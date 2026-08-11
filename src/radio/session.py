@@ -406,11 +406,7 @@ class RadioSession:
 
             return self.play_next()
 
-
-        tracks = self.radio.station.library.get_tracks(
-            self.radio.station.artist
-        )
-
+        tracks = self.radio.station.library.get_tracks(self.radio.station.artist)
 
         for track in tracks:
 
@@ -430,7 +426,6 @@ class RadioSession:
                 self.save()
 
                 return track
-
 
         self.state.running = True
 
@@ -522,14 +517,16 @@ class RadioSession:
 
     def skip(self) -> Optional[Track]:
 
-        if not self.state.running:
+        print("SKIP START")
 
+        if not self.state.running:
             return None
 
         track = self.radio.next()
 
-        if track is None:
+        print("RADIO NEXT:", track)
 
+        if track is None:
             return None
 
         self.player.play(track.path)

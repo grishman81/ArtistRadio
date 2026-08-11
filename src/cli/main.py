@@ -154,9 +154,10 @@ def main():
 
         cli.start()
 
-        if cli.session.state.track is None:
 
-            cli.next()
+        if cli.session.player.current is None:
+
+            cli.session.play_next()
 
         print()
         print("📻 ArtistRadio Live")
@@ -171,23 +172,28 @@ def main():
 
                 state = cli.session.state
 
-                print(
-                    f"\r▶ Now: {state.track}",
-                    end="",
-                    flush=True,
-                )
+                track = cli.session.player.current
+
+                if track:
+
+                    print()
+
+                    print("📻 ArtistRadio Live")
+                    print("--------------------")
+                    print()
+
+                    print("▶ Now:")
+                    print(f"   {track}")
+
+                    print()
+
+                    print(
+                        f"⏭ Queue: {len(state.queue)} tracks"
+                    )
 
                 import time
 
                 time.sleep(5)
-
-        except KeyboardInterrupt:
-
-            print()
-            print()
-            print("Stopping radio...")
-
-            cli.stop()
 
         except KeyboardInterrupt:
 
