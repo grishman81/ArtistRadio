@@ -150,6 +150,31 @@ def main():
                     f"{item['title']} "
                     f"({item['year']})"
                 )
+    elif command == "run":
+
+        cli.start()
+
+        print()
+        print("📻 ArtistRadio is running")
+        print("Press Ctrl+C to stop")
+        print()
+
+        try:
+
+            while True:
+
+                cli.session.check_playback()
+
+                import time
+
+                time.sleep(1)
+
+        except KeyboardInterrupt:
+
+            print()
+            print("Stopping radio...")
+
+            cli.stop()
 
     else:
 
