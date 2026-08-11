@@ -154,7 +154,6 @@ def main():
 
         cli.start()
 
-
         if cli.session.player.current is None:
 
             cli.session.play_next()
@@ -164,6 +163,8 @@ def main():
         print("--------------------")
         print()
 
+        last_track = None
+
         try:
 
             while True:
@@ -172,9 +173,11 @@ def main():
 
                 state = cli.session.state
 
-                track = cli.session.player.current
+                track = cli.session.current_track
 
-                if track:
+                if track and track != last_track:
+
+                    last_track = track
 
                     print()
 
@@ -183,7 +186,23 @@ def main():
                     print()
 
                     print("▶ Now:")
-                    print(f"   {track}")
+                    print(
+                        f"   {track.artist} - {track.title}"
+                    )
+
+                    print()
+
+                    print("💿 Album:")
+                    print(
+                        f"   {track.album}"
+                    )
+
+                    print()
+
+                    print("📅 Year:")
+                    print(
+                        f"   {track.year}"
+                    )
 
                     print()
 
