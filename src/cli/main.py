@@ -104,9 +104,52 @@ def main():
 
         print(track)
 
-    elif command == "status":
+    elif command == "queue":
 
-        print(cli.status())
+        queue = cli.queue()
+
+        print()
+        print("📻 Queue")
+        print("--------------------")
+
+        if not queue:
+
+            print("Queue is empty")
+
+        else:
+
+            for index, track in enumerate(
+                queue,
+                1,
+            ):
+
+                print(f"{index}. {track}")
+
+    elif command == "history":
+
+        history = cli.history()
+
+        print()
+        print("📜 History")
+        print("--------------------")
+
+        if not history:
+
+            print("History is empty")
+
+        else:
+
+            for index, item in enumerate(
+                history,
+                1,
+        ):
+
+                print(
+                    f"{index}. "
+                    f"{item['artist']} - "
+                    f"{item['title']} "
+                    f"({item['year']})"
+                )
 
     else:
 
