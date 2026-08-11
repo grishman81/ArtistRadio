@@ -160,3 +160,33 @@ def test_radio_session_skip():
     assert session.state.track == str(second.path)
 
     session.stop()
+
+def test_radio_session_skip():
+
+    session = create_session()
+
+    session.start()
+
+    first = session.play_next()
+
+    assert first is not None
+
+
+    second = session.skip()
+
+    assert second is not None
+
+
+    assert (
+        second.path
+        != first.path
+    )
+
+
+    assert (
+        session.state.track
+        == str(second.path)
+    )
+
+
+    session.stop()

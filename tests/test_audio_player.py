@@ -19,13 +19,25 @@ def test_player_initial_state():
     assert player.current_position() == 0.0
 
 
-
 def test_player_seek_position():
 
     player = AudioPlayer()
 
-    player.seek(
-        120.5
-    )
+    player.seek(120.5)
 
     assert player.current_position() == 120.5
+
+
+def test_player_pause_resume():
+
+    player = AudioPlayer()
+
+    player.playing = True
+
+    player.pause()
+
+    assert player.paused is True
+
+    player.resume()
+
+    assert player.paused is False

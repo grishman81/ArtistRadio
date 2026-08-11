@@ -53,7 +53,6 @@ class RadioSession:
 
         self.restore_queue()
 
-        self.save()
 
     def save(self):
 
@@ -82,9 +81,21 @@ class RadioSession:
 
             return
 
-        tracks = self.radio.station.library.get_tracks(self.radio.station.artist)
+        tracks = self.radio.station.library.get_tracks(
+            self.radio.station.artist
+        )
 
         restored = []
+
+        print("SAVED TRACK:", self.state.track)
+
+        print(
+            "LIBRARY TRACKS:",
+            [
+                str(track.path)
+               for track in tracks
+           ]
+    )
 
         for track in tracks:
 
@@ -403,7 +414,81 @@ class RadioSession:
 
         if not self.state.track:
 
+            self.state.running = True
+
+            self.radio.start()
+
             return self.play_next()
+
+
+        tracks = self.radio.station.library.get_tracks(
+            self.radio.station.artist
+        )
+
+
+        for track in tracks:
+
+            if str(track.path) == self.state.track:
+
+                self.state.running = True
+
+                self.radio.start()
+
+                self.player.play(
+                    track.path,
+                    self.state.position,
+                )
+
+                self.history.add(
+                    track
+                )
+
+                self.save()
+
+                return track
+
+
+        self.state.running = True
+
+        self.radio.start()
+
+        return self.play_next()
+
+
+        if not self.state.running:
+
+            return None
+
+
+        track = self.radio.next()
+
+
+        if track is None:
+
+            return None
+
+
+        self.player.play(
+            track.path
+        )
+
+
+        self.state.track = str(
+            track.path
+        )
+
+        self.state.position = 0.0
+
+
+        self.history.add(
+            track
+        )
+
+
+        self.save()
+
+
+        return track    
 
         tracks = self.radio.station.library.get_tracks(self.radio.station.artist)
 
@@ -411,14 +496,20 @@ class RadioSession:
 
             if str(track.path) == self.state.track:
 
-                self.player.play(
-                    track.path,
-                    self.state.position,
-                )
+                 self.state.running = True
+                 
+                 self.radio.start()
 
-                self.history.add(track)
+                 self.player.play(
+                     track.path,
+                 self.state.position,
+                 )
 
-                return track
+                 self.history.add(
+                     track
+                 )
+
+                 return track
 
         return self.play_next()
 
@@ -502,23 +593,6 @@ class RadioSession:
 
         self.save()
 
-    def test_radio_session_pause_resume():
-
-        session = create_session()
-
-        session.start()
-
-        session.play_next()
-
-        session.pause()
-
-        assert session.player.paused is True
-
-        session.resume()
-
-        assert session.player.paused is False
-
-        session.stop()
 
     def skip(self) -> Optional[Track]:
 
