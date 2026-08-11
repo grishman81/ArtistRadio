@@ -142,7 +142,7 @@ def main():
             for index, item in enumerate(
                 history,
                 1,
-        ):
+            ):
 
                 print(
                     f"{index}. "
@@ -159,8 +159,8 @@ def main():
             cli.next()
 
         print()
-        print("📻 ArtistRadio is running")
-        print("Press Ctrl+C to stop")
+        print("📻 ArtistRadio Live")
+        print("--------------------")
         print()
 
         try:
@@ -169,9 +169,25 @@ def main():
 
                 cli.session.check_playback()
 
+                state = cli.session.state
+
+                print(
+                    f"\r▶ Now: {state.track}",
+                    end="",
+                    flush=True,
+                )
+
                 import time
 
-                time.sleep(1)
+                time.sleep(5)
+
+        except KeyboardInterrupt:
+
+            print()
+            print()
+            print("Stopping radio...")
+
+            cli.stop()
 
         except KeyboardInterrupt:
 
