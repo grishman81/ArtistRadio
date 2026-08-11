@@ -216,6 +216,42 @@ class RadioScheduler:
 
 
 
+    def export_queue(
+        self,
+    ) -> list[str]:
+
+
+        return [
+            str(
+                track.path
+            )
+            for track in self.queue
+        ]
+
+
+
+    def restore_queue(
+        self,
+        tracks: list,
+    ) -> None:
+
+
+        self.queue.clear()
+
+
+        if not tracks:
+
+            return
+
+
+        for track in tracks:
+
+            self.queue.append(
+                track
+            )
+
+
+
     def clear(
         self,
     ):
