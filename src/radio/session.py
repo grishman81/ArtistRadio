@@ -449,6 +449,30 @@ class RadioSession:
 
                 return track
 
+    def process_command(self):
+
+        command = self.state.command
+
+        if not command:
+            return None
+
+        self.state.command = None
+        self.save()
+
+        if command == "pause":
+            self.pause()
+
+        elif command == "resume":
+            self.resume()
+
+        elif command == "next":
+            return self.play_next()
+
+        elif command == "stop":
+            self.stop()
+
+        return None
+
     def check_playback(
         self,
         delta: float = 1.0,
@@ -457,8 +481,11 @@ class RadioSession:
         if self.restoring:
             return None
 
-        if not self.state.running:
+        self.state = self.storage.load()
 
+        self.process_command()
+
+        if not self.state.running:
             return None
 
         if self.crossfade_running:

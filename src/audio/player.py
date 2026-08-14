@@ -143,21 +143,35 @@ class AudioPlayer:
 
     def pause(self) -> None:
 
+        if not self.playing:
+            return
 
-        if self.playing:
+        self.position = self.current_position()
 
-            self.paused = True
+        if self.process:
+            self.process.terminate()
+            self.process = None
 
+        self.playing = False
+        self.paused = True
 
 
     def resume(self) -> None:
 
+        if not self.paused:
+            return
 
-        if self.playing:
+        if self.current is None:
 
             self.paused = False
+            self.playing = True
 
+            return
 
+        self.play(
+            self.current,
+            self.position,
+        )
 
     def seek(
         self,

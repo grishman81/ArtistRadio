@@ -99,15 +99,17 @@ def main():
 
     elif command == "pause":
 
-        cli.pause()
+        cli.session.state.command = "pause"
+        cli.session.save()
 
-        print("Radio paused")
+        print("Pause command sent")
 
     elif command == "resume":
 
-        cli.resume()
+        cli.session.state.command = "resume"
+        cli.session.save()
 
-        print("Radio resumed")
+        print("Resume command sent")
 
     elif command == "next":
 
@@ -179,6 +181,11 @@ def main():
 
         if state.track and track:
 
+            if state.running:
+                print("▶ Playing")
+            else:
+                print("⏸ Paused")
+
             print("▶ Playing")
             print()
 
@@ -194,6 +201,16 @@ def main():
 
             print("💿 Album:")
             print(f"   {track.album}")
+
+            print()
+
+            print("📅 Year:")
+            print(f"   {track.year}")
+
+            print()
+
+            print("🎵 Genre:")
+            print(f"   {track.genre}")
 
             print()
 

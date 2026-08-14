@@ -34,6 +34,7 @@ class RadioStorage:
             "station": state.station,
             "track": state.track,
             "running": state.running,
+            "command": state.command,
             "mode": state.mode,
             "position": state.position,
             "queue": state.queue,
@@ -70,7 +71,6 @@ class RadioStorage:
 
 
         return RadioState(
-
             station=data.get(
                 "station",
                 "",
@@ -83,6 +83,10 @@ class RadioStorage:
             running=data.get(
                 "running",
                 False,
+            ),
+
+            command=data.get(
+                "command",
             ),
 
             mode=data.get(

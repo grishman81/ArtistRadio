@@ -20,6 +20,8 @@ class RadioState:
 
     running: bool = False
 
+    command: Optional[str] = None
+
     mode: str = "random"
 
     position: float = 0.0
