@@ -542,6 +542,50 @@ class RadioSession:
 
             return levels
 
+        current_track = self.current_track
+
+        if current_track is not None:
+
+            duration = float(
+                getattr(
+                    current_track,
+                    "duration",
+                    0.0,
+                )
+                or 0.0
+            )
+
+            position = self.player.current_position()
+
+            if (
+                duration > 0.0
+                and self.should_crossfade(
+                    position,
+                    duration,
+                )
+            ):
+
+                if self.next_track is None:
+
+                    track = self.radio.next()
+
+                    if track is not None:
+
+                        self.prepare_next_track(track)
+
+                if (
+                    self.next_track is not None
+                    and not self.crossfade_running
+                ):
+
+                    self.crossfade.start()
+
+                    self.crossfade_running = True
+
+                    return self.apply_crossfade(
+                        self.crossfade.elapsed_time
+                    )
+
         if self.player.is_finished():
 
             return self.play_next()
