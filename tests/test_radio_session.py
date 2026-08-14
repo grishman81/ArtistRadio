@@ -190,3 +190,27 @@ def test_radio_session_skip():
 
 
     session.stop()
+
+def test_radio_session_check_playback_crossfade_tick():
+
+    session = create_session()
+
+    session.start()
+
+    session.crossfade.start()
+
+    session.crossfade_running = True
+
+    levels = session.check_playback(
+        delta=1.0
+    )
+
+    assert levels is not None
+
+    assert levels["old"] == 0.8
+
+    assert levels["new"] == 0.2
+
+    assert session.crossfade.elapsed_time == 1.0
+
+    session.stop()
