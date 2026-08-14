@@ -14,7 +14,6 @@ class RadioStorage:
     Stores radio state.
     """
 
-
     def __init__(
         self,
         path: Path,
@@ -22,13 +21,10 @@ class RadioStorage:
 
         self.path = path
 
-
-
     def save(
         self,
         state: RadioState,
     ) -> None:
-
 
         data = {
             "station": state.station,
@@ -38,8 +34,10 @@ class RadioStorage:
             "mode": state.mode,
             "position": state.position,
             "queue": state.queue,
+            "crossfade_running": state.crossfade_running,
+            "crossfade_progress": state.crossfade_progress,
+            "next_track": state.next_track,
         }
-
 
         self.path.write_text(
             json.dumps(
@@ -50,25 +48,19 @@ class RadioStorage:
             encoding="utf-8",
         )
 
-
-
     def load(
         self,
     ) -> RadioState:
 
-
         if not self.path.exists():
 
             return RadioState()
-
-
 
         data = json.loads(
             self.path.read_text(
                 encoding="utf-8"
             )
         )
-
 
         return RadioState(
             station=data.get(
@@ -102,5 +94,19 @@ class RadioStorage:
             queue=data.get(
                 "queue",
                 [],
+            ),
+
+            crossfade_running=data.get(
+                "crossfade_running",
+                False,
+            ),
+
+            crossfade_progress=data.get(
+                "crossfade_progress",
+                0.0,
+            ),
+
+            next_track=data.get(
+                "next_track",
             ),
         )

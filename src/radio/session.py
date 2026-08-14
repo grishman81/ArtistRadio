@@ -490,7 +490,21 @@ class RadioSession:
 
             self.crossfade.tick(delta)
 
-            levels = self.apply_crossfade(self.crossfade.elapsed_time)
+            levels = self.apply_crossfade(
+                self.crossfade.elapsed_time
+            )
+
+            self.state.crossfade_running = True
+
+            self.state.crossfade_progress = (
+                self.crossfade.progress()
+            )
+
+            self.state.next_track = (
+                str(self.next_track.path)
+                if self.next_track is not None
+                else None
+            )
 
             if self.crossfade.is_complete():
 
@@ -538,6 +552,10 @@ class RadioSession:
 
                 self.crossfade_running = False
 
+                self.state.crossfade_running = False
+                self.state.crossfade_progress = 0.0
+                self.state.next_track = None
+                
                 self.save()
 
             return levels
@@ -582,9 +600,24 @@ class RadioSession:
 
                     self.crossfade_running = True
 
-                    return self.apply_crossfade(
+                    levels = self.apply_crossfade(
                         self.crossfade.elapsed_time
                     )
+
+                    self.state.crossfade_running = True
+                    self.state.crossfade_progress = (
+                        self.crossfade.progress()
+                    )
+
+                    self.state.next_track = (
+                        str(self.next_track.path)
+                        if self.next_track is not None
+                        else None
+                    )
+
+                    self.save()
+
+                    return levels
 
         if self.player.is_finished():
 

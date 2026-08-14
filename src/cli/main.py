@@ -163,70 +163,97 @@ def main():
                     f"{item['title']} "
                     f"({item['year']})"
                 )
+
     elif command == "status":
 
-        state = cli.session.state
-
-        track = None
-
-        if state.track:
-            track = cli.session.radio.station.library.tracks.get_by_path(
-                state.track
-            )
+        status = cli.status()
 
         print()
         print("📻 ArtistRadio Status")
         print("--------------------")
         print()
 
-        if state.track and track:
+        if status["track"]:
 
-            if state.running:
+            if status["running"]:
                 print("▶ Playing")
             else:
                 print("⏸ Paused")
 
-            print("▶ Playing")
             print()
 
-            print("Artist:")
-            print(f"   {track.artist}")
-
-            print()
-
-            print("Track:")
-            print(f"   {track.title}")
-
-            print()
-
-            print("💿 Album:")
-            print(f"   {track.album}")
-
-            print()
-
-            print("📅 Year:")
-            print(f"   {track.year}")
-
-            print()
-
-            print("🎵 Genre:")
-            print(f"   {track.genre}")
-
-            print()
-
-            position = state.position
-
-            print("⏱ Position:")
-            print(
-                f"   {format_time(position)} / "
-                f"{format_time(track.duration)}"
+            track = cli.session.radio.station.library.tracks.get_by_path(
+                status["track"]
             )
 
-            print()
+            if track:
 
-            print(
-                f"⏭ Queue: {len(state.queue)} tracks"
-            )
+                print("Artist:")
+                print(f"   {track.artist}")
+
+                print()
+
+                print("Track:")
+                print(f"   {track.title}")
+
+                print()
+
+                print("💿 Album:")
+                print(f"   {track.album}")
+
+                print()
+
+                print("📅 Year:")
+                print(f"   {track.year}")
+
+                print()
+
+                print("🎵 Genre:")
+                print(f"   {track.genre}")
+
+                print()
+
+                print("⏱ Position:")
+                print(
+                    f"   {format_time(status['position'])} / "
+                    f"{format_time(track.duration)}"
+                )
+
+                print()
+
+                if status["crossfade_running"]:
+
+                    progress = (
+                        status["crossfade_progress"]
+                        * 100
+                    )
+
+                    print("🎚️ Crossfade:")
+                    print(
+                        f"   ACTIVE "
+                        f"{progress:.0f}%"
+                    )
+
+                    if status["next_track"]:
+
+                        print()
+
+                        print("▶ Next:")
+                        print(
+                            f"   {status['next_track']}"
+                        )
+
+                else:
+
+                    print("🎚️ Crossfade:")
+                    print("   Inactive")
+
+                print()
+
+                print(
+                    f"📋 Queue: "
+                    f"{len(status['queue'])} tracks"
+                )
 
         else:
 

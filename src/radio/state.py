@@ -29,3 +29,7 @@ class RadioState:
     queue: list[str] = field(
         default_factory=list
     )
+
+    crossfade_running: bool = False
+    crossfade_progress: float = 0.0
+    next_track: Optional[str] = None
