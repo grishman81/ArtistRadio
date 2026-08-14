@@ -235,6 +235,56 @@ class AudioPlayer:
         )
 
     # ------------------------------------------------------------------
+    # Secondary -> Primary handoff
+    # ------------------------------------------------------------------
+
+    def handoff_secondary(self) -> None:
+
+        if self.secondary_process is None:
+            return
+
+        if self.secondary is None:
+            return
+
+        old_primary = self.process
+
+        new_primary = self.secondary_process
+        new_current = self.secondary
+
+        if old_primary is not None:
+
+            try:
+                old_primary.terminate()
+
+                try:
+                    old_primary.wait(
+                        timeout=1
+                    )
+                except Exception:
+                    pass
+
+            except Exception:
+                pass
+
+        self.process = new_primary
+        self.current = new_current
+
+        self.secondary_process = None
+        self.secondary = None
+
+        self._primary_session = self._secondary_session
+        self._secondary_session = None
+
+        self.primary_volume = 1.0
+        self.secondary_volume = 0.0
+
+        self.playing = True
+        self.paused = False
+
+        if self.started_at is None:
+            self.started_at = time.time()
+
+    # ------------------------------------------------------------------
     # Secondary control
     # ------------------------------------------------------------------
 

@@ -481,8 +481,6 @@ class RadioSession:
         if self.restoring:
             return None
 
-        self.state = self.storage.load()
-
         self.process_command()
 
         if not self.state.running:
@@ -498,10 +496,38 @@ class RadioSession:
 
                 if hasattr(
                     self.player,
+                    "handoff_secondary",
+                ):
+
+                    self.player.handoff_secondary()
+
+                elif hasattr(
+                    self.player,
                     "stop_secondary",
                 ):
 
                     self.player.stop_secondary()
+
+                if self.next_track is not None:
+
+                    self.current_track = self.next_track
+
+                    self.state.track = str(
+                        self.next_track.path
+                    )
+
+                    self.state.position = 0.0
+
+                    if hasattr(
+                        self,
+                        "history",
+                    ):
+
+                        self.history.add(
+                            self.next_track
+                        )
+
+                self.next_track = None
 
                 if hasattr(
                     self.crossfade,
@@ -511,6 +537,8 @@ class RadioSession:
                     self.crossfade.stop()
 
                 self.crossfade_running = False
+
+                self.save()
 
             return levels
 
