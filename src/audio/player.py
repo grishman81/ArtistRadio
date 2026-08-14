@@ -278,11 +278,14 @@ class AudioPlayer:
         self.primary_volume = 1.0
         self.secondary_volume = 0.0
 
+        # Новый основной трек начинается с нулевой позиции.
+        # Старый started_at нельзя сохранять, иначе RadioSession
+        # будет считать, что новый трек уже давно играет.
+        self.position = 0.0
+        self.started_at = time.time()
+
         self.playing = True
         self.paused = False
-
-        if self.started_at is None:
-            self.started_at = time.time()
 
     # ------------------------------------------------------------------
     # Secondary control

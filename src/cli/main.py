@@ -260,31 +260,26 @@ def main():
                 if track:
 
                     print("\033[H\033[J", end="")
-                    
-                    if track != last_track:
 
-                        last_track = track
+                    print()
+                    print("📻 ArtistRadio Live")
+                    print("--------------------")
+                    print()
 
-                        print()
+                    print("▶ Now:")
+                    print(f"   {track.artist} - {track.title}")
 
-                        print("📻 ArtistRadio Live")
-                        print("--------------------")
-                        print()
+                    print()
 
-                        print("▶ Now:")
-                        print(f"   {track.artist} - {track.title}")
+                    print("💿 Album:")
+                    print(f"   {track.album}")
 
-                        print()
+                    print()
 
-                        print("💿 Album:")
-                        print(f"   {track.album}")
+                    print("📅 Year:")
+                    print(f"   {track.year}")
 
-                        print()
-
-                        print("📅 Year:")
-                        print(f"   {track.year}")
-
-                        print()
+                    print()
 
                     position = cli.session.player.current_position()
 
@@ -301,15 +296,25 @@ def main():
 
                     bar_size = 20
 
-                    filled = int(bar_size * position / max(track.duration, 1))
+                    filled = int(
+                        bar_size
+                        * position
+                        / max(track.duration, 1)
+                    )
 
-                    bar = "█" * filled + "░" * (bar_size - filled)
+                    bar = (
+                        "█" * filled
+                        + "░" * (bar_size - filled)
+                    )
 
                     print(f"   {bar}")
 
                     print()
 
-                    print(f"⏭ Queue: {len(state.queue)} tracks")
+                    print(
+                        f"📋 Queue: "
+                        f"{len(state.queue)} tracks"
+                    )
 
                 import time
 
