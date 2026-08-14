@@ -338,6 +338,37 @@ def main():
 
                     print()
 
+                    if cli.session.crossfade_running:
+
+                        progress = (
+                            cli.session.crossfade.progress()
+                            * 100
+                        )
+
+                        print("🎚️ Crossfade:")
+                        print(
+                            f"   ACTIVE "
+                            f"{progress:.0f}%"
+                        )
+
+                        if cli.session.next_track:
+
+                            print()
+
+                            print("▶ Next:")
+                            print(
+                                "   "
+                                f"{cli.session.next_track.title}"
+                            )
+
+                    else:
+
+                        print("🎚️ Crossfade:")
+                        print("   Inactive")
+
+                    print()
+                    print()
+
                     print(
                         f"📋 Queue: "
                         f"{len(state.queue)} tracks"
