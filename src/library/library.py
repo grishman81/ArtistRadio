@@ -68,6 +68,11 @@ class Library:
     def has_track(self, path: str) -> bool:
         return self.tracks.exists(path)
 
+
+    def get_track_by_path(self, path: str):
+        return self.tracks.get_by_path(path)
+
+
     def count_tracks(self) -> int:
         return self.tracks.count()
 

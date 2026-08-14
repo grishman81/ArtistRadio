@@ -36,15 +36,26 @@ class TrackRepository:
     def get_by_path(self, path: str):
         row = self.db.connection.execute(
             """
-            SELECT *
+            SELECT
+                tracks.*,
+                albums.title AS album,
+                albums.year,
+                albums.genre,
+                artists.name AS artist
             FROM tracks
-            WHERE path=?
+            JOIN albums
+                ON tracks.album_id = albums.id
+            JOIN artists
+                ON albums.artist_id = artists.id
+            WHERE tracks.path=?
             """,
             (path,),
         ).fetchone()
 
+
         if row is None:
             return None
+
 
         return self._row_to_track(row)
 

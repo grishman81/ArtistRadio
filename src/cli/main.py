@@ -161,6 +161,60 @@ def main():
                     f"{item['title']} "
                     f"({item['year']})"
                 )
+    elif command == "status":
+
+        state = cli.session.state
+
+        track = None
+
+        if state.track:
+            track = cli.session.radio.station.library.tracks.get_by_path(
+                state.track
+            )
+
+        print()
+        print("📻 ArtistRadio Status")
+        print("--------------------")
+        print()
+
+        if state.track and track:
+
+            print("▶ Playing")
+            print()
+
+            print("Artist:")
+            print(f"   {track.artist}")
+
+            print()
+
+            print("Track:")
+            print(f"   {track.title}")
+
+            print()
+
+            print("💿 Album:")
+            print(f"   {track.album}")
+
+            print()
+
+            position = state.position
+
+            print("⏱ Position:")
+            print(
+                f"   {format_time(position)} / "
+                f"{format_time(track.duration)}"
+            )
+
+            print()
+
+            print(
+                f"⏭ Queue: {len(state.queue)} tracks"
+            )
+
+        else:
+
+            print("Radio is stopped")
+
     elif command == "run":
 
         cli.start()
@@ -216,6 +270,10 @@ def main():
                         print()
 
                     position = cli.session.player.current_position()
+
+                    cli.session.state.position = position
+
+                    cli.session.save()
 
                     print("⏱ Progress:")
 
