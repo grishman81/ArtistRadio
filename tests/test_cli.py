@@ -105,3 +105,51 @@ def test_cli_status():
     assert status["station"] == "Test Radio"
 
     assert status["mode"] == "random"
+from src.cli.app import RadioCLI
+
+
+def test_cli_status_includes_crossfade_state():
+
+    session = type(
+        "Session",
+        (),
+        {},
+    )()
+
+    session.state = type(
+        "State",
+        (),
+        {
+            "station": "Test Radio",
+            "track": "current.mp3",
+            "running": True,
+            "mode": "random",
+            "position": 120.0,
+            "queue": [],
+        },
+    )()
+
+    session.crossfade_running = True
+    session.next_track = type(
+        "Track",
+        (),
+        {
+            "path": "next.mp3",
+        },
+    )()
+
+    session.crossfade = type(
+        "Crossfade",
+        (),
+        {
+            "progress": lambda self: 0.4,
+        },
+    )()
+
+    cli = RadioCLI(session)
+
+    status = cli.status()
+
+    assert status["crossfade_running"] is True
+    assert status["crossfade_progress"] == 0.4
+    assert status["next_track"] == "next.mp3"

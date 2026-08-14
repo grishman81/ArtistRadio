@@ -59,6 +59,33 @@ class RadioCLI:
 
         state = self.session.state
 
+        crossfade_running = getattr(
+            self.session,
+            "crossfade_running",
+            False,
+        )
+
+        crossfade = getattr(
+            self.session,
+            "crossfade",
+            None,
+        )
+
+        crossfade_progress = 0.0
+
+        if crossfade is not None and hasattr(
+            crossfade,
+            "progress",
+        ):
+
+            crossfade_progress = crossfade.progress()
+
+        next_track = getattr(
+            self.session,
+            "next_track",
+            None,
+        )
+
         return {
             "station": state.station,
             "track": state.track,
@@ -66,6 +93,13 @@ class RadioCLI:
             "mode": state.mode,
             "position": state.position,
             "queue": state.queue,
+            "crossfade_running": crossfade_running,
+            "crossfade_progress": crossfade_progress,
+            "next_track": (
+                str(next_track.path)
+                if next_track is not None
+                else None
+            ),
         }
 
     def queue(self):
