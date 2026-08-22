@@ -495,3 +495,81 @@ def test_radio_session_processes_external_queue_add_command():
     assert session.state.running is True
 
     session.stop()
+
+def test_radio_session_queue_move():
+
+    session = create_session()
+
+    session.start()
+
+    scheduler = session.radio.scheduler
+
+    scheduler.clear()
+    scheduler.ensure_queue()
+
+    assert len(scheduler.queue) == 3
+
+    original = list(
+        scheduler.queue
+    )
+
+    moved = scheduler.move(
+        3,
+        1,
+    )
+
+    assert moved is True
+
+    assert (
+        scheduler.queue[0].path
+        == original[2].path
+    )
+
+    assert (
+        scheduler.queue[1].path
+        == original[0].path
+    )
+
+    assert (
+        scheduler.queue[2].path
+        == original[1].path
+    )
+
+    session.stop()
+
+def test_radio_session_processes_external_queue_move_command():
+
+    session = create_session()
+
+    session.start()
+
+    scheduler = session.radio.scheduler
+
+    scheduler.clear()
+    scheduler.ensure_queue()
+
+    assert len(scheduler.queue) == 3
+
+    original = list(
+        scheduler.queue
+    )
+
+    external_state = session.storage.load()
+
+    external_state.command = "queue_move:3:1"
+
+    session.storage.save(
+        external_state
+    )
+
+    result = session.process_command()
+
+    assert result is None
+
+    assert scheduler.queue[0].path == original[2].path
+    assert scheduler.queue[1].path == original[0].path
+    assert scheduler.queue[2].path == original[1].path
+
+    assert session.state.running is True
+
+    session.stop()

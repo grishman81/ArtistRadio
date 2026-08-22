@@ -298,6 +298,49 @@ class RadioScheduler:
 
         return True
 
+    def move(
+        self,
+        from_index: int,
+        to_index: int,
+    ) -> bool:
+
+        if from_index < 1:
+
+            return False
+
+        if to_index < 1:
+
+            return False
+
+        if from_index > len(self.queue):
+
+            return False
+
+        if to_index > len(self.queue):
+
+            return False
+
+        queue = list(
+            self.queue
+        )
+
+        track = queue.pop(
+            from_index - 1
+        )
+
+        queue.insert(
+            to_index - 1,
+            track,
+        )
+
+        self.queue.clear()
+
+        self.queue.extend(
+            queue
+        )
+
+        return True
+
     def size(
         self,
     ) -> int:

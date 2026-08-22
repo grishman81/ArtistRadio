@@ -59,7 +59,16 @@ class RadioSession:
 
     def save(self):
 
-        self.storage.save(self.state)
+        if hasattr(
+            self,
+            "radio",
+        ):
+
+            self.save_queue()
+
+        self.storage.save(
+            self.state
+        )
 
     def restore_queue(self):
 
@@ -84,17 +93,30 @@ class RadioSession:
 
             return
 
-        tracks = self.radio.station.library.get_tracks(self.radio.station.artist)
+        tracks = self.radio.station.library.get_tracks(
+            self.radio.station.artist
+        )
+
+        tracks_by_path = {
+            str(track.path): track
+            for track in tracks
+        }
 
         restored = []
 
-        for track in tracks:
+        for path in self.state.queue:
 
-            if str(track.path) in self.state.queue:
+            track = tracks_by_path.get(
+                str(path)
+            )
+
+            if track is not None:
 
                 restored.append(track)
 
-        scheduler.restore_queue(restored)
+        scheduler.restore_queue(
+            restored
+        )
 
     def save_queue(self):
 
@@ -574,6 +596,48 @@ class RadioSession:
                 )
 
                 if added is not None:
+
+                    self.save_queue()
+
+                    self.save()
+        elif command.startswith("queue_move:"):
+
+            scheduler = getattr(
+                self.radio,
+                "scheduler",
+                None,
+            )
+
+            if scheduler is not None:
+
+                try:
+
+                    parts = command.split(
+                        ":",
+                        2,
+                    )
+
+                    from_index = int(
+                        parts[1]
+                    )
+
+                    to_index = int(
+                        parts[2]
+                    )
+
+                except (
+                    ValueError,
+                    IndexError,
+                ):
+
+                    return None
+
+                moved = scheduler.move(
+                    from_index,
+                    to_index,
+                )
+
+                if moved:
 
                     self.save_queue()
 

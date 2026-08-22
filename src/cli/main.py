@@ -180,6 +180,45 @@ def main():
             print(
                 "Queue add command sent"
             )
+    elif command == "queue-move":
+
+        if len(sys.argv) < 4:
+
+            print(
+                "Usage: queue-move <from> <to>"
+            )
+
+        else:
+
+            try:
+
+                from_index = int(
+                    sys.argv[2]
+                )
+
+                to_index = int(
+                    sys.argv[3]
+                )
+
+            except ValueError:
+
+                print(
+                    "Queue positions must be integers"
+                )
+
+            else:
+
+                cli.session.state.command = (
+                    f"queue_move:"
+                    f"{from_index}:"
+                    f"{to_index}"
+                )
+
+                cli.session.save()
+
+                print(
+                    "Queue move command sent"
+                )
 
     elif command == "queue":
 
