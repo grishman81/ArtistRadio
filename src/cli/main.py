@@ -123,7 +123,41 @@ def main():
         cli.session.state.command = "queue_clear"
         cli.session.save()
 
-        print("Queue clear command sent")    
+        print("Queue clear command sent")
+
+    elif command == "queue-remove":
+
+        if len(sys.argv) < 3:
+
+            print(
+                "Usage: queue-remove <number>"
+            )
+
+        else:
+
+            try:
+
+                queue_index = int(
+                    sys.argv[2]
+                )
+
+            except ValueError:
+
+                print(
+                    "Queue number must be an integer"
+                )
+
+            else:
+
+                cli.session.state.command = (
+                    f"queue_remove:{queue_index}"
+                )
+
+                cli.session.save()
+
+                print(
+                    "Queue remove command sent"
+                )    
 
     elif command == "queue":
 

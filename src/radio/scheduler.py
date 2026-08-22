@@ -258,7 +258,45 @@ class RadioScheduler:
 
         self.queue.clear()
 
+    def remove(
+        self,
+        path: str,
+    ) -> bool:
 
+        for track in list(self.queue):
+
+            if str(track.path) == str(path):
+
+                self.queue.remove(track)
+
+                return True
+
+        return False
+
+    def remove_at(
+        self,
+        index: int,
+    ) -> bool:
+
+        if index < 1:
+
+            return False
+
+        if index > len(self.queue):
+
+            return False
+
+        queue = list(self.queue)
+
+        del queue[index - 1]
+
+        self.queue.clear()
+
+        self.queue.extend(
+            queue
+        )
+
+        return True
 
     def size(
         self,

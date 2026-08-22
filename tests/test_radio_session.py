@@ -352,3 +352,70 @@ def test_radio_session_play_next_persists_queue():
     assert len(saved.queue) == 3
 
     session.stop()
+
+def test_radio_session_queue_remove():
+
+    session = create_session()
+
+    session.start()
+
+    scheduler = session.radio.scheduler
+
+    scheduler.ensure_queue()
+
+    assert len(scheduler.queue) == 3
+
+    target = scheduler.queue[1]
+
+    removed = scheduler.remove(
+        str(target.path)
+    )
+
+    assert removed is True
+
+    assert len(scheduler.queue) == 2
+
+    assert all(
+        str(track.path) != str(target.path)
+        for track in scheduler.queue
+    )
+
+    session.stop()
+
+def test_radio_session_processes_external_queue_remove_command():
+
+    session = create_session()
+
+    session.start()
+
+    scheduler = session.radio.scheduler
+
+    scheduler.ensure_queue()
+
+    assert len(scheduler.queue) == 3
+
+    target = scheduler.queue[1]
+
+    external_state = session.storage.load()
+
+    external_state.command = "queue_remove:2"
+
+    session.storage.save(
+        external_state
+    )
+
+    result = session.process_command()
+
+    assert result is None
+
+    assert len(scheduler.queue) == 2
+
+    assert all(
+        str(track.path)
+        != str(target.path)
+        for track in scheduler.queue
+    )
+
+    assert session.state.running is True
+
+    session.stop()

@@ -500,6 +500,49 @@ class RadioSession:
 
                 self.save()
 
+        elif command.startswith("queue_remove:"):
+
+            scheduler = getattr(
+                self.radio,
+                "scheduler",
+                None,
+            )
+
+            if scheduler is not None:
+
+                try:
+
+                    queue_index = int(
+                        command.split(
+                            ":",
+                            1,
+                        )[1]
+                    )
+
+                except ValueError:
+
+                    return None
+
+                if queue_index < 1:
+
+                    return None
+
+                queue = list(
+                    scheduler.queue
+                )
+
+                if queue_index > len(queue):
+
+                    return None
+
+                scheduler.remove_at(
+                    queue_index
+                )
+
+                self.save_queue()
+
+                self.save()        
+
         return None
     
     def check_playback(
