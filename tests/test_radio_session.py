@@ -300,3 +300,55 @@ def test_radio_session_play_next_uses_scheduler_queue():
     assert result.path == expected.path
 
     session.stop()
+
+def test_radio_session_processes_external_queue_clear_command():
+
+    session = create_session()
+
+    session.start()
+
+    scheduler = session.radio.scheduler
+
+    scheduler.ensure_queue()
+
+    assert scheduler.queue
+
+    external_state = session.storage.load()
+
+    external_state.command = "queue_clear"
+
+    session.storage.save(
+        external_state
+    )
+
+    result = session.process_command()
+
+    assert result is None
+
+    assert len(scheduler.queue) == 0
+
+    assert session.state.running is True
+
+    session.stop()
+
+def test_radio_session_play_next_persists_queue():
+
+    session = create_session()
+
+    session.start()
+
+    scheduler = session.radio.scheduler
+
+    scheduler.clear()
+
+    result = session.play_next()
+
+    assert result is not None
+
+    assert len(scheduler.queue) == 3
+
+    saved = session.storage.load()
+
+    assert len(saved.queue) == 3
+
+    session.stop()

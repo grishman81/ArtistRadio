@@ -370,6 +370,8 @@ class RadioSession:
 
             self.history.add(track)
 
+            self.save_queue()
+
             self.save()
 
         return track
@@ -481,6 +483,22 @@ class RadioSession:
         elif command == "stop":
 
             self.stop()
+
+        elif command == "queue_clear":
+
+            scheduler = getattr(
+                self.radio,
+                "scheduler",
+                None,
+            )
+
+            if scheduler is not None:
+
+                scheduler.clear()
+
+                self.save_queue()
+
+                self.save()
 
         return None
     
@@ -682,7 +700,7 @@ class RadioSession:
         if not self.state.running:
             return None
 
-        track = self.radio.next()
+        track = self.radio.scheduler.next()
 
         if track is None:
             return None

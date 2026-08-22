@@ -118,6 +118,13 @@ def main():
 
         print("Next command sent")
 
+    elif command == "queue-clear":
+
+        cli.session.state.command = "queue_clear"
+        cli.session.save()
+
+        print("Queue clear command sent")    
+
     elif command == "queue":
 
         queue = cli.queue()
