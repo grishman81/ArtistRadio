@@ -159,6 +159,28 @@ def main():
                     "Queue remove command sent"
                 )    
 
+    elif command == "queue-add":
+
+        if len(sys.argv) < 3:
+
+            print(
+                "Usage: queue-add <path>"
+            )
+
+        else:
+
+            path = sys.argv[2]
+
+            cli.session.state.command = (
+                f"queue_add:{path}"
+            )
+
+            cli.session.save()
+
+            print(
+                "Queue add command sent"
+            )
+
     elif command == "queue":
 
         queue = cli.queue()
@@ -431,7 +453,6 @@ def main():
                         print("🎚️ Crossfade:")
                         print("   Inactive")
 
-                    print()
                     print()
 
                     print(

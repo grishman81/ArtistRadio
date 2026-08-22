@@ -419,3 +419,79 @@ def test_radio_session_processes_external_queue_remove_command():
     assert session.state.running is True
 
     session.stop()
+
+def test_radio_session_queue_add():
+
+    session = create_session()
+
+    session.start()
+
+    scheduler = session.radio.scheduler
+
+    scheduler.clear()
+
+    tracks = session.radio.station.library.get_tracks(
+        "Jennifer Lopez"
+    )
+
+    assert tracks
+
+    target = tracks[0]
+
+    added = scheduler.add(
+        target
+    )
+
+    assert added is target
+
+    assert len(scheduler.queue) == 1
+
+    assert (
+        scheduler.queue[0].path
+        == target.path
+    )
+
+    session.stop()
+
+def test_radio_session_processes_external_queue_add_command():
+
+    session = create_session()
+
+    session.start()
+
+    scheduler = session.radio.scheduler
+
+    scheduler.clear()
+
+    tracks = session.radio.station.library.get_tracks(
+        "Jennifer Lopez"
+    )
+
+    assert tracks
+
+    target = tracks[0]
+
+    external_state = session.storage.load()
+
+    external_state.command = (
+        f"queue_add:{target.path}"
+    )
+
+    session.storage.save(
+        external_state
+    )
+
+    result = session.process_command()
+
+    assert result is None
+
+    assert len(scheduler.queue) == 1
+
+    assert (
+        scheduler.queue[0].path
+        == target.path
+    )
+
+    assert session.state.running is True
+
+    session.stop()

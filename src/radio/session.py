@@ -527,11 +527,9 @@ class RadioSession:
 
                     return None
 
-                queue = list(
+                if queue_index > len(
                     scheduler.queue
-                )
-
-                if queue_index > len(queue):
+                ):
 
                     return None
 
@@ -541,7 +539,45 @@ class RadioSession:
 
                 self.save_queue()
 
-                self.save()        
+                self.save()
+
+        elif command.startswith("queue_add:"):
+
+            scheduler = getattr(
+                self.radio,
+                "scheduler",
+                None,
+            )
+
+            if scheduler is not None:
+
+                path = command.split(
+                    ":",
+                    1,
+                )[1]
+
+                track = (
+                    self.radio
+                    .station
+                    .library
+                    .get_track_by_path(
+                        path
+                    )
+                )
+
+                if track is None:
+
+                    return None
+
+                added = scheduler.add(
+                    track
+                )
+
+                if added is not None:
+
+                    self.save_queue()
+
+                    self.save()
 
         return None
     
