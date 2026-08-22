@@ -237,3 +237,45 @@ def test_cli_status_includes_crossfade_output():
 
     assert cli.session.state.command == "next"
     assert cli.session.save_calls == 1
+
+def test_cli_queue_returns_paths():
+
+    session = FakeSession()
+
+    session.radio = type(
+        "Radio",
+        (),
+        {
+            "scheduler": type(
+                "Scheduler",
+                (),
+                {
+                    "queue": [
+                        type(
+                            "Track",
+                            (),
+                            {
+                                "path": "track1.mp3",
+                            },
+                        )(),
+                        type(
+                            "Track",
+                            (),
+                            {
+                                "path": "track2.mp3",
+                            },
+                        )(),
+                    ]
+                },
+            )(),
+        },
+    )()
+
+    cli = RadioCLI(session)
+
+    queue = cli.queue()
+
+    assert queue == [
+        "track1.mp3",
+        "track2.mp3",
+    ]  

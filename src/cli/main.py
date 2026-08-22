@@ -137,7 +137,30 @@ def main():
                 1,
             ):
 
-                print(f"{index}. {track}")
+                track_obj = (
+                    cli.session
+                    .radio
+                    .station
+                    .library
+                    .tracks
+                    .get_by_path(
+                        track
+                    )
+                )
+
+                if track_obj:
+
+                    print(
+                        f"{index}. "
+                        f"{track_obj.artist} - "
+                        f"{track_obj.title}"
+                    )
+
+                else:
+
+                    print(
+                        f"{index}. {track}"
+                    )
 
     elif command == "history":
 
