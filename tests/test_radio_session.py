@@ -278,3 +278,25 @@ def test_radio_session_processes_external_stop_command():
     assert session.player.current is None
 
     assert session.state.command is None
+
+def test_radio_session_play_next_uses_scheduler_queue():
+
+    session = create_session()
+
+    session.start()
+
+    scheduler = session.radio.scheduler
+
+    scheduler.ensure_queue()
+
+    assert len(scheduler.queue) >= 1
+
+    expected = scheduler.queue[0]
+
+    result = session.play_next()
+
+    assert result is not None
+
+    assert result.path == expected.path
+
+    session.stop()

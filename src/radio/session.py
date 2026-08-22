@@ -356,7 +356,7 @@ class RadioSession:
 
             return None
 
-        track = self.radio.next()
+        track = self.radio.scheduler.next()
 
         if track:
 
