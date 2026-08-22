@@ -346,7 +346,7 @@ class AudioPlayer:
 
         self.primary_volume = 1.0
 
-        self._primary_session = None
+        self.current = None
 
     # ------------------------------------------------------------------
     # Pause / resume

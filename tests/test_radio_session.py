@@ -250,3 +250,31 @@ def test_radio_session_processes_external_next_command():
     assert session.state.command is None
 
     session.stop()
+
+def test_radio_session_processes_external_stop_command():
+
+    session = create_session()
+
+    session.start()
+
+    track = session.play_next()
+
+    assert track is not None
+
+    external_state = session.storage.load()
+
+    external_state.command = "stop"
+
+    session.storage.save(
+        external_state
+    )
+
+    result = session.process_command()
+
+    assert result is None
+
+    assert session.state.running is False
+
+    assert session.player.current is None
+
+    assert session.state.command is None
