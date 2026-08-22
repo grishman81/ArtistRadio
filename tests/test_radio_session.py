@@ -211,6 +211,42 @@ def test_radio_session_check_playback_crossfade_tick():
 
     assert levels["new"] == 0.2
 
-    assert session.crossfade.elapsed_time == 1.0
+    assert (
+        session.crossfade.elapsed_time
+        == 1.0
+    )
+
+    session.stop()
+
+
+def test_radio_session_processes_external_next_command():
+
+    session = create_session()
+
+    session.start()
+
+    first = session.play_next()
+
+    assert first is not None
+
+    external_state = session.storage.load()
+
+    external_state.command = "next"
+
+    session.storage.save(
+        external_state
+    )
+
+    result = session.process_command()
+
+    assert result is not None
+
+    assert result.path != first.path
+
+    assert session.state.track == str(
+        result.path
+    )
+
+    assert session.state.command is None
 
     session.stop()

@@ -199,3 +199,41 @@ def test_cli_status_includes_crossfade_output():
     assert status["crossfade_running"] is True
     assert status["crossfade_progress"] == 0.4
     assert status["next_track"] == "next.mp3"
+
+    def test_cli_next_sends_command_to_runtime(tmp_path):
+
+        session = type(
+        "Session",
+        (),
+        {},
+    )()
+
+    session.state = type(
+        "State",
+        (),
+        {
+            "command": None,
+        },
+    )()
+
+    session.save_calls = 0
+
+    def save():
+
+        session.save_calls += 1
+
+    session.save = save
+
+    class FakeCLI:
+
+        def __init__(self, session):
+
+            self.session = session
+
+    cli = FakeCLI(session)
+
+    cli.session.state.command = "next"
+    cli.session.save()
+
+    assert cli.session.state.command == "next"
+    assert cli.session.save_calls == 1

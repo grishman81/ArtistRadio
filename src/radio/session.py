@@ -451,28 +451,39 @@ class RadioSession:
 
     def process_command(self):
 
-        command = self.state.command
+        external_state = self.storage.load()
+
+        command = external_state.command
 
         if not command:
             return None
 
         self.state.command = None
-        self.save()
+
+        external_state.command = None
+
+        self.storage.save(
+            external_state
+        )
 
         if command == "pause":
+
             self.pause()
 
         elif command == "resume":
+
             self.resume()
 
         elif command == "next":
+
             return self.play_next()
 
         elif command == "stop":
+
             self.stop()
 
         return None
-
+    
     def check_playback(
         self,
         delta: float = 1.0,

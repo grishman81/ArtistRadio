@@ -113,9 +113,10 @@ def main():
 
     elif command == "next":
 
-        track = cli.next()
+        cli.session.state.command = "next"
+        cli.session.save()
 
-        print(track)
+        print("Next command sent")
 
     elif command == "queue":
 
