@@ -5,7 +5,6 @@ Radio Session
 """
 
 from pathlib import Path
-from turtle import position
 from typing import Optional
 
 from src.radio.engine import RadioEngine
@@ -220,7 +219,14 @@ class RadioSession:
             "radio",
         ):
 
-            track = self.radio.next()
+            scheduler = getattr(
+                self.radio,
+                "scheduler",
+                None,
+            )
+
+            if scheduler is not None:
+                track = scheduler.next()
 
         if track is None:
 
@@ -903,16 +909,4 @@ class RadioSession:
         if track is None:
             return None
 
-        self.current_track = track
-
-        self.player.play(track.path)
-
-        self.state.track = str(track.path)
-
-        self.state.position = 0.0
-
-        self.history.add(track)
-
-        self.save()
-
-        return track
+        return self._start_transition(track)
