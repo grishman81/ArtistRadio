@@ -573,3 +573,41 @@ def test_radio_session_processes_external_queue_move_command():
     assert session.state.running is True
 
     session.stop()
+
+def test_radio_session_next_uses_transition_for_current_track():
+
+    session = create_session()
+
+    session.start()
+
+    first = session.play_next()
+
+    assert first is not None
+
+    scheduler = session.radio.scheduler
+
+    next_track = scheduler.peek()
+
+    assert next_track is not None
+
+    started = []
+
+    original_transition = session.transition_to_next_track
+
+    def fake_transition(track, elapsed=0.0):
+
+        started.append(track)
+
+        return track
+
+    session.transition_to_next_track = fake_transition
+
+    result = session.play_next()
+
+    assert result is next_track
+
+    assert started == [next_track]
+
+    session.transition_to_next_track = original_transition
+
+    session.stop()
