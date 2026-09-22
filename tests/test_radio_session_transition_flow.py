@@ -123,6 +123,40 @@ def test_check_playback_starts_automatic_crossfade_near_track_end():
     assert session.state.crossfade_running is True
 
 
+def test_check_playback_accumulates_fractional_elapsed_time():
+    session = make_session()
+    next_track = SimpleNamespace(path=Path("next.mp3"))
+
+    session.transition_to_next_track(next_track)
+
+    first = session.check_playback(delta=0.25)
+
+    assert first["old"] == 0.95
+    assert first["new"] == 0.05
+    assert session.crossfade.elapsed_time == 0.25
+    assert session.crossfade_running is True
+
+    second = session.check_playback(delta=0.65)
+
+    assert second["old"] == 0.82
+    assert second["new"] == 0.18
+    assert session.crossfade.elapsed_time == 0.9
+    assert session.player.current == Path("current.mp3")
+    assert session.player.secondary == Path("next.mp3")
+    assert session.crossfade_running is True
+
+    final = session.check_playback(delta=4.1)
+
+    assert final["old"] == 0.0
+    assert final["new"] == 1.0
+    assert session.crossfade_running is False
+    assert session.next_track is None
+    assert session.current_track is next_track
+    assert session.player.current == Path("next.mp3")
+    assert session.player.secondary is None
+    assert session.player.handoff_count == 1
+
+
 def test_check_playback_completes_handoff_after_crossfade():
     session = make_session()
     next_track = SimpleNamespace(path=Path("next.mp3"))
