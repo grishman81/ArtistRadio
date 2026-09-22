@@ -185,9 +185,11 @@ def test_radio_session_skip():
 
     assert (
         session.state.track
-        == str(second.path)
+        == str(first.path)
     )
 
+    assert session.next_track is second
+    assert session.crossfade_running is True
 
     session.stop()
 
@@ -244,9 +246,11 @@ def test_radio_session_processes_external_next_command():
     assert result.path != first.path
 
     assert session.state.track == str(
-        result.path
+        first.path
     )
 
+    assert session.next_track is result
+    assert session.crossfade_running is True
     assert session.state.command is None
 
     session.stop()
@@ -675,5 +679,36 @@ def test_radio_session_check_transition_uses_scheduler_queue():
     assert result is expected
 
     assert session.next_track is expected
+
+    session.stop()
+
+
+def test_radio_session_automatic_crossfade_uses_transition_flow():
+
+    session = create_session()
+
+    session.start()
+
+    first = session.play_next()
+
+    assert first is not None
+
+    current = session.current_track
+
+    assert current is first
+
+    current.duration = session.crossfade_duration + 1.0
+    session.player.position = 1.0
+
+    scheduler = session.radio.scheduler
+    expected = scheduler.peek()
+
+    assert expected is not None
+
+    result = session.check_playback(delta=1.0)
+
+    assert result is not None
+    assert session.next_track is expected
+    assert session.crossfade_running is True
 
     session.stop()
