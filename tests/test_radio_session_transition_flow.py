@@ -171,7 +171,7 @@ def test_check_playback_completes_handoff_when_delta_overshoots():
 
     assert levels["old"] == 0.0
     assert levels["new"] == 1.0
-    assert session.crossfade.elapsed_time == 5.0
+    assert session.crossfade.elapsed_time == 0.0
     assert session.crossfade_running is False
     assert session.next_track is None
     assert session.current_track is next_track
