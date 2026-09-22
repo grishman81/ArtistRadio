@@ -13,18 +13,27 @@ def ensure_test_library():
     database = LibraryDatabase(DATABASE)
     database.create()
 
-    artist = database.connection.execute(
-        "SELECT id FROM artists WHERE name = ?",
-        ("Jennifer Lopez",),
-    ).fetchone()
+    required_artists = [
+        "Jennifer Lopez",
+        "Madonna",
+        "Michael Jackson",
+    ]
 
-    if artist is None:
-        artist_id = database.connection.execute(
-            "INSERT INTO artists(name, folder) VALUES(?, ?)",
-            ("Jennifer Lopez", "tests"),
-        ).lastrowid
+    existing = {
+        row["name"]
+        for row in database.connection.execute(
+            "SELECT name FROM artists"
+        ).fetchall()
+    }
 
-        album_id = database.connection.execute(
+    for artist_name in required_artists:
+        if artist_name not in existing:
+            artist_id = database.connection.execute(
+                "INSERT INTO artists(name, folder) VALUES(?, ?)",
+                (artist_name, "tests"),
+            ).lastrowid
+
+            album_id = database.connection.execute(
             """
             INSERT INTO albums(
                 artist_id, title, year, genre, folder
@@ -33,7 +42,7 @@ def ensure_test_library():
             """,
             (
                 artist_id,
-                "Test Album",
+                f"{artist_name} Test Album",
                 2026,
                 "Pop",
                 "tests",
@@ -69,7 +78,7 @@ def ensure_test_library():
                     "mp3",
                     1000000,
                     0.0,
-                    f"tests/track_{number}.mp3",
+                    f"tests/{artist_name.lower().replace(' ', '_')}_track_{number}.mp3",
                 ),
             )
 
