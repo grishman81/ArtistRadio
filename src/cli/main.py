@@ -50,6 +50,17 @@ def format_time(seconds: float) -> str:
     return f"{minutes:02d}:{seconds:02d}"
 
 
+def playback_delta(
+    previous_time: float,
+    current_time: float,
+) -> float:
+
+    return max(
+        0.0,
+        current_time - previous_time,
+    )
+
+
 def create_session():
 
     library = Library(Path("database"))
@@ -434,11 +445,22 @@ def main():
             streamer.start()
             print(f"📡 Icecast: {streamer.config.url}")
 
+        previous_time = time.monotonic()
+
         try:
 
             while True:
 
-                cli.session.check_playback()
+                current_time = time.monotonic()
+                delta = playback_delta(
+                    previous_time,
+                    current_time,
+                )
+                previous_time = current_time
+
+                cli.session.check_playback(
+                    delta=delta,
+                )
 
                 state = cli.session.state
 
@@ -532,8 +554,6 @@ def main():
                         f"📋 Queue: "
                         f"{len(state.queue)} tracks"
                     )
-
-                import time
 
                 time.sleep(1)
 

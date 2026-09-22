@@ -4,6 +4,7 @@ CLI Tests
 """
 
 from src.cli.app import RadioCLI
+from src.cli.main import playback_delta
 
 
 class FakeSession:
@@ -277,3 +278,28 @@ def test_cli_queue_returns_paths():
         "track1.mp3",
         "track2.mp3",
     ]  
+
+def test_playback_delta_uses_elapsed_time():
+
+    previous_time = 100.0
+    current_time = 101.75
+
+    delta = playback_delta(
+        previous_time,
+        current_time,
+    )
+
+    assert delta == 1.75
+
+
+def test_playback_delta_never_returns_negative():
+
+    previous_time = 101.0
+    current_time = 100.0
+
+    delta = playback_delta(
+        previous_time,
+        current_time,
+    )
+
+    assert delta == 0.0
