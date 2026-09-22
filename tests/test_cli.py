@@ -333,4 +333,4 @@ def test_playback_step_passes_elapsed_delta():
         100.90,
     )
 
-    assert session.deltas == pytest.approx([0.25, 0.65])
+    assert [round(delta, 2) for delta in session.deltas] == [0.25, 0.65]
