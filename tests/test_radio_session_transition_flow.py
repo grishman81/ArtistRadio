@@ -39,6 +39,12 @@ class FakePlayer:
     def stop_secondary(self):
         self.secondary = None
 
+    def current_position(self):
+        return 95.0
+
+    def is_finished(self):
+        return False
+
 
 class FakeHistory:
     def __init__(self):
@@ -63,7 +69,10 @@ def make_session():
     session.crossfade = CrossfadeEngine(duration=5)
     session.crossfade_running = False
     session.next_track = None
-    session.current_track = SimpleNamespace(path=Path("current.mp3"))
+    session.current_track = SimpleNamespace(
+        path=Path("current.mp3"),
+        duration=100.0,
+    )
     session.history = FakeHistory()
     session.restoring = False
     session.storage = FakeStorage()
@@ -95,6 +104,21 @@ def test_transition_starts_secondary_and_crossfade():
     assert session.player.secondary_volume == 0.0
     assert session.state.crossfade_running is True
     assert session.state.next_track == "next.mp3"
+
+
+def test_check_playback_starts_automatic_crossfade_near_track_end():
+    session = make_session()
+
+    result = session.check_playback(delta=1.0)
+
+    assert result["old"] == 1.0
+    assert result["new"] == 0.0
+    assert session.crossfade_running is True
+    assert session.next_track is not None
+    assert session.player.secondary == session.next_track.path
+    assert session.player.primary_volume == 1.0
+    assert session.player.secondary_volume == 0.0
+    assert session.state.crossfade_running is True
 
 
 def test_check_playback_completes_handoff_after_crossfade():
