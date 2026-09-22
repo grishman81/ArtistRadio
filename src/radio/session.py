@@ -882,10 +882,9 @@ class RadioSession:
                             track = next_method()
 
                     if track is not None:
-                        return self.transition_to_next_track(
-                            track
-                        )
-
+                        self.transition_to_next_track(track)
+                        return self.crossfade.update(0.0)
+                        
         if self.player.is_finished():
 
             return self.play_next()

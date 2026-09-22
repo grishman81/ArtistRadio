@@ -67,6 +67,7 @@ def make_session():
     session.player = FakePlayer()
     session.player.current = Path("current.mp3")
     session.crossfade = CrossfadeEngine(duration=5)
+    session.crossfade_duration = session.crossfade.duration
     session.crossfade_running = False
     session.next_track = None
     session.current_track = SimpleNamespace(
@@ -76,6 +77,7 @@ def make_session():
     session.history = FakeHistory()
     session.restoring = False
     session.storage = FakeStorage()
+    session.radio = FakeRadio()
     session.state = SimpleNamespace(
         track="current.mp3",
         running=True,
@@ -150,3 +152,14 @@ def test_check_playback_completes_handoff_after_crossfade():
     assert session.state.crossfade_progress == 0.0
     assert session.state.next_track is None
     assert session.history.items == [next_track]
+
+class FakeScheduler:
+    def next(self):
+        return SimpleNamespace(
+            path=Path("next.mp3"),
+        )
+
+
+class FakeRadio:
+    def __init__(self):
+        self.scheduler = FakeScheduler()
