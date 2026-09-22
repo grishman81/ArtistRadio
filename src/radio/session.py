@@ -368,7 +368,9 @@ class RadioSession:
 
             return track
 
-        return self.apply_crossfade(elapsed)
+        self.apply_crossfade(elapsed)
+
+        return track
 
     def _play_track_immediately(
         self,
