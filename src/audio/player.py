@@ -71,10 +71,6 @@ class AudioPlayer:
 
         if session is None:
             session = self._find_session(process)
-            if process is self.process:
-                self._primary_session = session
-            elif process is self.secondary_process:
-                self._secondary_session = session
 
         if session is None:
             return
@@ -82,7 +78,21 @@ class AudioPlayer:
         try:
             session.SimpleAudioVolume.SetMasterVolume(volume, None)
         except Exception:
-            pass
+            # Windows audio sessions can be recreated while ffplay is
+            # starting or after a device/session change. Refresh the session
+            # once instead of silently keeping a stale COM object.
+            session = self._find_session(process)
+            if session is None:
+                return
+            try:
+                session.SimpleAudioVolume.SetMasterVolume(volume, None)
+            except Exception:
+                return
+
+        if process is self.process:
+            self._primary_session = session
+        elif process is self.secondary_process:
+            self._secondary_session = session
 
     def _start_ffplay(self, path: Path):
         command = [
