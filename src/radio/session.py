@@ -370,33 +370,86 @@ class RadioSession:
 
         return self.apply_crossfade(elapsed)
 
+    def _play_track_immediately(
+        self,
+        track: Track,
+    ) -> Optional[Track]:
+
+        if track is None:
+            return None
+
+        if hasattr(
+            self.player,
+            "stop_secondary",
+        ):
+            self.player.stop_secondary()
+
+        self.crossfade.stop()
+        self.crossfade_running = False
+        self.next_track = None
+
+        self.current_track = track
+
+        self.player.play(
+            track.path
+        )
+
+        self.state.track = str(
+            track.path
+        )
+
+        self.state.position = 0.0
+
+        self.state.crossfade_running = False
+        self.state.crossfade_progress = 0.0
+        self.state.next_track = None
+
+        if hasattr(
+            self,
+            "history",
+        ):
+            self.history.add(track)
+
+        self.save_queue()
+        self.save()
+
+        return track
+
+    def _start_transition(
+        self,
+        track: Track,
+    ):
+        if track is None:
+            return None
+
+        if self.current_track is None:
+            return self._play_track_immediately(track)
+
+        if not hasattr(
+            self.player,
+            "play_secondary",
+        ):
+            return self._play_track_immediately(track)
+
+        return self.transition_to_next_track(
+            track
+        )
+
     def play_next(
         self,
     ) -> Optional[Track]:
 
         if not self.state.running:
-
             return None
 
         track = self.radio.scheduler.next()
 
-        if track:
+        if track is None:
+            return None
 
-            self.current_track = track
-
-            self.player.play(track.path)
-
-            self.state.track = str(track.path)
-
-            self.state.position = 0.0
-
-            self.history.add(track)
-
-            self.save_queue()
-
-            self.save()
-
-        return track
+        return self._start_transition(
+            track
+        )
 
     def play_history_item(
         self,
@@ -757,7 +810,7 @@ class RadioSession:
 
                 if self.next_track is None:
 
-                    track = self.radio.next()
+                    track = self.radio.scheduler.next()
 
                     if track is not None:
 
