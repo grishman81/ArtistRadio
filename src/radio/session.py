@@ -34,6 +34,15 @@ class RadioSession:
         self.player = player
         self.history = history
 
+        scheduler = getattr(
+            self.radio,
+            "scheduler",
+            None,
+        )
+
+        if scheduler is not None:
+            scheduler.history = history
+
         self.crossfade = CrossfadeEngine()
 
         self.crossfade_duration = self.crossfade.duration
@@ -289,7 +298,18 @@ class RadioSession:
 
             self.crossfade_running = False
 
-        self.prepare_next_track(track)
+        if self.crossfade_running:
+            if hasattr(
+                self.player,
+                "stop_secondary",
+            ):
+                self.player.stop_secondary()
+
+            self.crossfade.stop()
+            self.crossfade_running = False
+
+        if self.next_track is not track:
+            self.prepare_next_track(track)
 
         self.crossfade.start()
 
@@ -821,36 +841,9 @@ class RadioSession:
                     track = self.radio.scheduler.next()
 
                     if track is not None:
-
-                        self.prepare_next_track(track)
-
-                if (
-                    self.next_track is not None
-                    and not self.crossfade_running
-                ):
-
-                    self.crossfade.start()
-
-                    self.crossfade_running = True
-
-                    levels = self.apply_crossfade(
-                        self.crossfade.elapsed_time
-                    )
-
-                    self.state.crossfade_running = True
-                    self.state.crossfade_progress = (
-                        self.crossfade.progress()
-                    )
-
-                    self.state.next_track = (
-                        str(self.next_track.path)
-                        if self.next_track is not None
-                        else None
-                    )
-
-                    self.save()
-
-                    return levels
+                        return self.transition_to_next_track(
+                            track
+                        )
 
         if self.player.is_finished():
 
