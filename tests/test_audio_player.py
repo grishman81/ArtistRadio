@@ -64,7 +64,7 @@ def test_find_session_retries_until_audio_session_appears(monkeypatch):
 
     import src.audio.player as player_module
 
-    monkeypatch.setattr(player_module, "AudioUtilities", FakeAudioUtilities)
+    monkeypatch.setattr(player_module, "PYCAW_AVAILABLE", True)\n    monkeypatch.setattr(player_module, "AudioUtilities", FakeAudioUtilities)
     monkeypatch.setattr(player_module.time, "sleep", lambda _: None)
 
     player = AudioPlayer()
