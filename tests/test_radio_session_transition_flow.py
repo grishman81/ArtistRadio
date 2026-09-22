@@ -157,6 +157,29 @@ def test_check_playback_accumulates_fractional_elapsed_time():
     assert session.player.handoff_count == 1
 
 
+def test_check_playback_completes_handoff_when_delta_overshoots():
+    session = make_session()
+    next_track = SimpleNamespace(path=Path("next.mp3"))
+
+    session.transition_to_next_track(next_track)
+
+    session.check_playback(delta=4.9)
+    assert session.crossfade_running is True
+    assert session.crossfade.elapsed_time == 4.9
+
+    levels = session.check_playback(delta=0.5)
+
+    assert levels["old"] == 0.0
+    assert levels["new"] == 1.0
+    assert session.crossfade.elapsed_time == 5.0
+    assert session.crossfade_running is False
+    assert session.next_track is None
+    assert session.current_track is next_track
+    assert session.player.current == Path("next.mp3")
+    assert session.player.secondary is None
+    assert session.player.handoff_count == 1
+
+
 def test_check_playback_completes_handoff_after_crossfade():
     session = make_session()
     next_track = SimpleNamespace(path=Path("next.mp3"))
