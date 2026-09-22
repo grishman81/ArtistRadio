@@ -20,6 +20,21 @@ from src.radio.storage import RadioStorage
 from src.radio.history import PlaybackHistory
 
 from src.audio.player import AudioPlayer
+from src.config import (
+    AUDIO_DEVICE,
+    STREAM_ENABLED,
+    STREAM_AUDIO_DEVICE,
+    ICECAST_HOST,
+    ICECAST_PORT,
+    ICECAST_MOUNT,
+    ICECAST_PASSWORD,
+    ICECAST_NAME,
+    ICECAST_GENRE,
+    STREAM_SAMPLE_RATE,
+    STREAM_CHANNELS,
+    BITRATE,
+)
+from src.streaming.icecast import IcecastConfig, IcecastStreamer
 
 from src.cli.app import RadioCLI
 
@@ -61,7 +76,7 @@ def create_session():
 
     history = PlaybackHistory(Path("radio_history.json"))
 
-    player = AudioPlayer()
+    player = AudioPlayer(audio_device=AUDIO_DEVICE)
 
     return RadioSession(
         radio,
@@ -400,6 +415,25 @@ def main():
 
         last_track = None
 
+        streamer = None
+        if STREAM_ENABLED:
+            streamer = IcecastStreamer(
+                IcecastConfig(
+                    host=ICECAST_HOST,
+                    port=ICECAST_PORT,
+                    mount=ICECAST_MOUNT,
+                    password=ICECAST_PASSWORD,
+                    name=ICECAST_NAME,
+                    genre=ICECAST_GENRE,
+                    audio_device=STREAM_AUDIO_DEVICE,
+                    bitrate=BITRATE,
+                    sample_rate=STREAM_SAMPLE_RATE,
+                    channels=STREAM_CHANNELS,
+                )
+            )
+            streamer.start()
+            print(f"📡 Icecast: {streamer.config.url}")
+
         try:
 
             while True:
@@ -508,6 +542,8 @@ def main():
             print()
             print("Stopping radio...")
 
+            if streamer is not None:
+                streamer.stop()
             cli.stop()
 
     else:

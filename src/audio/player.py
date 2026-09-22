@@ -19,7 +19,8 @@ except ImportError:
 class AudioPlayer:
     """Управление воспроизведением через ffplay."""
 
-    def __init__(self):
+    def __init__(self, audio_device: str | None = None):
+        self.audio_device = audio_device or ""
         self.started_at = None
         self.current: Path | None = None
         self.secondary: Path | None = None
@@ -103,8 +104,10 @@ class AudioPlayer:
             "quiet",
             "-volume",
             "100",
-            str(path),
         ]
+        if self.audio_device:
+            command.extend(["-audio_device", self.audio_device])
+        command.append(str(path))
         return subprocess.Popen(command)
 
     def play(self, path: Path, position: float = 0.0) -> None:

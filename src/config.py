@@ -45,3 +45,20 @@ DEFAULT_ARTIST = "Jennifer Lopez"
 BITRATE = 320
 
 HISTORY_LIMIT = 100
+
+
+# Локальный аудиовыход. Оставьте пустым для системного устройства по умолчанию.
+AUDIO_DEVICE = ""
+
+
+# Icecast streaming. Включается после настройки виртуального аудиокабеля.
+STREAM_ENABLED = False
+STREAM_AUDIO_DEVICE = "CABLE Output (VB-Audio Virtual Cable)"
+ICECAST_HOST = "127.0.0.1"
+ICECAST_PORT = 8000
+ICECAST_MOUNT = "/artist-radio.mp3"
+ICECAST_PASSWORD = "hackme"
+ICECAST_NAME = STATION_NAME
+ICECAST_GENRE = "Various"
+STREAM_SAMPLE_RATE = 44100
+STREAM_CHANNELS = 2
