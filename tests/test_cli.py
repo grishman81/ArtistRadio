@@ -306,69 +306,31 @@ def test_playback_delta_never_returns_negative():
 
 
 
-def test_run_loop_passes_elapsed_delta(monkeypatch):
+
+def test_playback_step_passes_elapsed_delta():
 
     class FakeSession:
 
         def __init__(self):
             self.deltas = []
-            self.current = None
-            self.current_track = None
-            self.crossfade_running = False
-            self.next_track = None
-            self.state = type(
-                "State",
-                (),
-                {"queue": []},
-            )()
-            self.player = type(
-                "Player",
-                (),
-                {"current_position": lambda self: 0.0},
-            )()
 
         def check_playback(self, delta=1.0):
             self.deltas.append(delta)
-            raise KeyboardInterrupt
 
-        def start(self):
-            pass
-
-        def stop(self):
-            pass
-
-        def play_next(self):
-            pass
-
-        def save(self):
-            pass
-
-    class FakeCLI:
-        def __init__(self, session):
-            self.session = session
-
-        def start(self):
-            self.session.start()
-
-        def stop(self):
-            self.session.stop()
+    from src.cli.main import playback_step
 
     session = FakeSession()
-    clocks = iter([100.0, 100.25])
+    previous_time = 100.0
 
-    monkeypatch.setattr("src.cli.main.time.monotonic", lambda: next(clocks))
-    monkeypatch.setattr("src.cli.main.time.sleep", lambda _: None)
-    monkeypatch.setattr("src.cli.main.create_session", lambda: session)
-    monkeypatch.setattr("src.cli.main.RadioCLI", FakeCLI)
+    previous_time = playback_step(
+        session,
+        previous_time,
+        100.25,
+    )
+    previous_time = playback_step(
+        session,
+        previous_time,
+        100.90,
+    )
 
-    import sys
-    monkeypatch.setattr(sys, "argv", ["artist-radio", "run"])
-
-    from src.cli.main import main
-
-    try:
-        main()
-    except KeyboardInterrupt:
-        pass
-
-    assert session.deltas == [0.25]
+    assert session.deltas == pytest.approx([0.25, 0.65])

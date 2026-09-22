@@ -61,6 +61,22 @@ def playback_delta(
     )
 
 
+def playback_step(
+    session,
+    previous_time: float,
+    current_time: float,
+) -> float:
+
+    delta = playback_delta(
+        previous_time,
+        current_time,
+    )
+    session.check_playback(
+        delta=delta,
+    )
+    return current_time
+
+
 def create_session():
 
     library = Library(Path("database"))
@@ -452,14 +468,10 @@ def main():
             while True:
 
                 current_time = time.monotonic()
-                delta = playback_delta(
+                previous_time = playback_step(
+                    cli.session,
                     previous_time,
                     current_time,
-                )
-                previous_time = current_time
-
-                cli.session.check_playback(
-                    delta=delta,
                 )
 
                 current_time = time.monotonic()
