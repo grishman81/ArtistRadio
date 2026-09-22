@@ -41,3 +41,34 @@ def test_player_pause_resume():
     player.resume()
 
     assert player.paused is False
+
+
+
+def test_find_session_retries_until_audio_session_appears(monkeypatch):
+
+    class FakeProcess:
+        pid = 1234
+
+    class FakeSession:
+        ProcessId = 1234
+
+    class FakeAudioUtilities:
+        calls = 0
+
+        @classmethod
+        def GetAllSessions(cls):
+            cls.calls += 1
+            if cls.calls < 3:
+                return []
+            return [FakeSession()]
+
+    import src.audio.player as player_module
+
+    monkeypatch.setattr(player_module, "AudioUtilities", FakeAudioUtilities)
+    monkeypatch.setattr(player_module.time, "sleep", lambda _: None)
+
+    player = AudioPlayer()
+    session = player._find_session(FakeProcess())
+
+    assert session is not None
+    assert FakeAudioUtilities.calls == 3
