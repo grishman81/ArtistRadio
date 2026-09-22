@@ -860,7 +860,26 @@ class RadioSession:
 
                 if self.next_track is None:
 
-                    track = self.radio.scheduler.next()
+                    scheduler = getattr(
+                        self.radio,
+                        "scheduler",
+                        None,
+                    )
+
+                    track = None
+
+                    if scheduler is not None:
+                        track = scheduler.next()
+
+                    if track is None:
+                        next_method = getattr(
+                            self.radio,
+                            "next",
+                            None,
+                        )
+
+                        if callable(next_method):
+                            track = next_method()
 
                     if track is not None:
                         return self.transition_to_next_track(
