@@ -51,11 +51,13 @@ class FakeHistory:
 def make_session():
     session = object.__new__(RadioSession)
     session.player = FakePlayer()
+    session.player.current = Path("current.mp3")
     session.crossfade = CrossfadeEngine(duration=5)
     session.crossfade_running = False
     session.next_track = None
     session.current_track = SimpleNamespace(path=Path("current.mp3"))
     session.history = FakeHistory()
+    session.restoring = False
     session.state = SimpleNamespace(
         track="current.mp3",
         position=12.0,
