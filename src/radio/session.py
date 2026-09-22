@@ -74,9 +74,14 @@ class RadioSession:
 
             self.save_queue()
 
-        self.storage.save(
-            self.state
+        storage = getattr(
+            self,
+            "storage",
+            None,
         )
+
+        if storage is not None:
+            storage.save(self.state)
 
     def restore_queue(self):
 
@@ -237,13 +242,19 @@ class RadioSession:
             if scheduler is not None:
                 track = scheduler.next()
 
-        if track is None:
+        if track is None and hasattr(self, "radio"):
 
-            track = type(
-                "Track",
-                (),
-                {"path": Path("next_track.mp3")},
-            )()
+            next_method = getattr(
+                self.radio,
+                "next",
+                None,
+            )
+
+            if callable(next_method):
+                track = next_method()
+
+        if track is None:
+            return None
 
         return self.prepare_next_track(track)
 
@@ -308,7 +319,7 @@ class RadioSession:
             self.crossfade.stop()
             self.crossfade_running = False
 
-        if self.next_track is not track:
+        if getattr(self, "next_track", None) is not track:
             self.prepare_next_track(track)
 
         self.crossfade.start()
