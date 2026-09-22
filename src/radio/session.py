@@ -315,6 +315,17 @@ class RadioSession:
 
         self.crossfade_running = True
 
+        if hasattr(self.state, "crossfade_running"):
+            self.state.crossfade_running = True
+
+        if hasattr(self.state, "crossfade_progress"):
+            self.state.crossfade_progress = self.crossfade.progress()
+
+        if hasattr(self.state, "next_track"):
+            self.state.next_track = str(track.path)
+
+        self.save()
+
         can_crossfade = hasattr(
             self.player,
             "apply_primary_volume",
