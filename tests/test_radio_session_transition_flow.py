@@ -48,6 +48,14 @@ class FakeHistory:
         self.items.append(track)
 
 
+class FakeStorage:
+    def load(self):
+        return SimpleNamespace(command=None)
+
+    def save(self, state):
+        return None
+
+
 def make_session():
     session = object.__new__(RadioSession)
     session.player = FakePlayer()
@@ -58,6 +66,7 @@ def make_session():
     session.current_track = SimpleNamespace(path=Path("current.mp3"))
     session.history = FakeHistory()
     session.restoring = False
+    session.storage = FakeStorage()
     session.state = SimpleNamespace(
         track="current.mp3",
         position=12.0,
