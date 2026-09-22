@@ -462,6 +462,17 @@ def main():
                     delta=delta,
                 )
 
+                current_time = time.monotonic()
+                delta = playback_delta(
+                    previous_time,
+                    current_time,
+                )
+                previous_time = current_time
+
+                cli.session.check_playback(
+                    delta=delta,
+                )
+
                 state = cli.session.state
 
                 track = cli.session.current_track
