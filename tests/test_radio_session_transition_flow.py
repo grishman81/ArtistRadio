@@ -69,6 +69,7 @@ def make_session():
     session.storage = FakeStorage()
     session.state = SimpleNamespace(
         track="current.mp3",
+        running=True,
         position=12.0,
         crossfade_running=False,
         crossfade_progress=0.0,
