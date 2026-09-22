@@ -3,8 +3,6 @@ ArtistRadio Engine
 CLI Tests
 """
 
-from flask import session
-
 from src.cli.app import RadioCLI
 
 
